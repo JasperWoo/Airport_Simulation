@@ -12,14 +12,14 @@ public class AirportSim {
     };
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 50;
+        int numInitials = 12;
         airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1,20,10); //Los Angelas
         airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1,20,10); //Austin
         airportList[2] = new Airport("ATL", 0.1, 0.1, 0.1,20,10); // Atlanta
         airportList[3] = new Airport("SEA", 0.1, 0.1, 0.1,20,10); //Seattle
         airportList[4] = new Airport("YYZ", 0.1, 0.1, 0.1,20,10); //Toronto
 
-        Simulator.stopAt(10);
+        Simulator.stopAt(1000);
         //In each loop, new planes will depart at every airport
         for (int i=0; i<numInitials; i++ ){
             Airplane boe747_1 = new Airplane("Boe747", 614,416);

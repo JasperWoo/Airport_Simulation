@@ -25,10 +25,6 @@ public class Airport implements EventHandler {
     private int m_groundCapacity;
 
 
-
-
-
-
     public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, double runwayTimeToTakeoff, int groundCapacity, int airCapacity) {
         m_airportName = name;
         m_inTheAir =  0;
@@ -46,19 +42,16 @@ public class Airport implements EventHandler {
     }
 
     public String getName() { return m_airportName;}
-    public int getGroundCapacity() {
-        return m_groundCapacity;
-    }
+    public int getGroundCapacity() {return m_groundCapacity;}
 
-    public int getAirCapacity() {
-        return m_airCapacity;
-    }
+    public int getAirCapacity() {return m_airCapacity;}
     public int getNumArrived(){ return m_numArrived; }
     public int getNumDeparted(){ return m_numDeparted; }
     public double getCirclingTime(){ return m_circlingTime; }
     public double getInTheAir(){ return m_inTheAir; }
     public double getOnTheGround(){ return m_onTheGround; }
 
+    // check if one of runways is free
     private void checkRunways(Airplane curAirplane, AirportEvent airportEvent){
         boolean flag = false;
         for (int i = 0; i < m_numRunways; i++){
@@ -68,6 +61,7 @@ public class Airport implements EventHandler {
                 break;
             }
         }
+        // if so, we can schedule new event
         if(flag) {
             m_freeRunways[curAirplane.runway_number] = false;
             Simulator.schedule(airportEvent);
@@ -75,10 +69,10 @@ public class Airport implements EventHandler {
         else
             m_runwayQueue.add(airportEvent);
     }
-
+    // check if destination is reachable based on air capacity and ground capacity
     private boolean checkDestCapacity(int nextAirport){
         Airport airport = AirportSim.airportList[nextAirport];
-        if(airport.getInTheAir()<airport.getAirCapacity() && airport.getOnTheGround()<airport.getInTheAir()){
+        if(airport.getInTheAir()<airport.getAirCapacity() && airport.getOnTheGround()<airport.getGroundCapacity()){
             return true;
         }else
             return false;
@@ -111,7 +105,7 @@ public class Airport implements EventHandler {
             case AirportEvent.PLANE_ARRIVES:
                 m_inTheAir++;
                 System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight arrived at airport " + AirportSim.airportList[curAirport].getName());
-                AirportEvent landedEvent = new AirportEvent(m_runwayTimeToLand, this, AirportEvent.PLANE_LANDED, airEvent.getPlane(), airEvent.getNumPassengers(), airEvent.getTime());
+                AirportEvent landedEvent = new AirportEvent(m_runwayTimeToLand, this, AirportEvent.PLANE_LANDED, curAirplane, airEvent.getNumPassengers(), airEvent.getTime());
                 //Since this process takes up the runway, we need to check if the runway is empty.
                 checkRunways(curAirplane, landedEvent);
                 break;
@@ -122,19 +116,19 @@ public class Airport implements EventHandler {
                 System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight lands at airport " + AirportSim.airportList[curAirport].getName() + " with " + airEvent.getNumPassengers() + " passengers.");
                 m_numArrived += airEvent.getNumPassengers();
                 //This process does not take up the runway, no need to check.
-                AirportEvent departureEvent = new AirportEvent( m_requiredTimeOnGround, this, AirportEvent.PLANE_DEPARTS, airEvent.getPlane(), airEvent.getNumPassengers(), airEvent.getTime());
+                AirportEvent departureEvent = new AirportEvent( m_requiredTimeOnGround, this, AirportEvent.PLANE_DEPARTS, curAirplane, airEvent.getNumPassengers(), airEvent.getTime());
                 Simulator.schedule(departureEvent);
                 continueRunway(airEvent);
                 break;
 
             case AirportEvent.PLANE_DEPARTS:
                 //Set random number of passengers.
-                int newNumPassengers = ThreadLocalRandom.current().nextInt(curAirplane.getCapacity()/2, airEvent.getPlane().getCapacity() + 1);
+                int newNumPassengers = ThreadLocalRandom.current().nextInt(curAirplane.getCapacity()/2, curAirplane.getCapacity() + 1);
                 m_numDeparted += newNumPassengers;
                 //Print out departing msg.
                 System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight is ready to depart " + " with " + newNumPassengers + " passengers.");
                 //Check if any runway is free, if there is, schedule takeoff event; if not, put it to the airport queue.
-                AirportEvent takeoffEvent = new AirportEvent(m_runwayTimeToTakeoff, this, AirportEvent.PLANE_TAKEOFF, airEvent.getPlane(), newNumPassengers, airEvent.getTime());
+                AirportEvent takeoffEvent = new AirportEvent(m_runwayTimeToTakeoff, this, AirportEvent.PLANE_TAKEOFF, curAirplane, newNumPassengers, airEvent.getTime());
                 checkRunways(curAirplane, takeoffEvent);
                 break;
 
@@ -146,7 +140,7 @@ public class Airport implements EventHandler {
                 int numAirports = AirportSim.airportList.length;
                 int nextAirport;
                 // AUS and SEA don't take A380.
-                if (airEvent.getPlane().getName().equals("A380")){
+                if (curAirplane.getName().equals("A380")){
                     int[] selectAirports = {0,2,4};
                     do
                         nextAirport = selectAirports[ThreadLocalRandom.current().nextInt(0,selectAirports.length)];
@@ -159,11 +153,11 @@ public class Airport implements EventHandler {
                 }
 
                 double dist = AirportSim.distAirports[curAirport][nextAirport];
-                double m_flightTime = dist / airEvent.getPlane().getSpeed();
+                double m_flightTime = dist / curAirplane.getSpeed();
 
                 //This process does not take up the runway, no need to check.
                 AirportEvent landingEvent = new AirportEvent( m_flightTime,  AirportSim.airportList[nextAirport],
-                        AirportEvent.PLANE_ARRIVES, airEvent.getPlane(), airEvent.getNumPassengers(), airEvent.getTime()); //The number of passengers is just the newNumPassengers
+                        AirportEvent.PLANE_ARRIVES, curAirplane, airEvent.getNumPassengers(), airEvent.getTime()); //The number of passengers is just the newNumPassengers
                 System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight takes off at airport " +
                         m_airportName + " and flies to " + AirportSim.airportList[nextAirport].getName() + ".");
                 if(checkDestCapacity(nextAirport)){
