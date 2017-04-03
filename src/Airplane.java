@@ -8,7 +8,6 @@ public class Airplane {
     private int m_speed;
     private int m_numberPassengers;
     public int runway_number;
-    public boolean state;
 
     //Added parameters
     public Airplane(String name, int speed, int numberPassengers) {
