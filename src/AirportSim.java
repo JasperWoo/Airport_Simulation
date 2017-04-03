@@ -19,7 +19,7 @@ public class AirportSim {
         airportList[3] = new Airport("SEA", 0.1, 0.1, 0.1); //Seattle
         airportList[4] = new Airport("YYZ", 0.1, 0.1, 0.1); //Toronto
 
-        Simulator.stopAt(100);
+        Simulator.stopAt(10);
         //In each loop, new planes will depart at every airport
         for (int i=0; i<numInitials; i++ ){
             Airplane boe747_1 = new Airplane("Boe747", 614,416);
