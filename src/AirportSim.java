@@ -12,7 +12,7 @@ public class AirportSim {
     };
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 12;
+        int numInitials = 100;
         airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1,20,10); //Los Angelas
         airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1,20,10); //Austin
         airportList[2] = new Airport("ATL", 0.1, 0.1, 0.1,20,10); // Atlanta
