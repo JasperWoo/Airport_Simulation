@@ -11,8 +11,8 @@ public class Airport implements EventHandler {
     private int m_inTheAir;
     private int m_onTheGround;
 
-    private int m_numRunways = 5;
-    private boolean m_freeRunways[] = new boolean[m_numRunways];
+    private int m_numRunways;
+    private boolean m_freeRunways[];
     private double m_runwayTimeToLand;
     private double m_runwayTimeToTakeoff;
     private double m_requiredTimeOnGround;
@@ -24,11 +24,14 @@ public class Airport implements EventHandler {
     private Queue<Event> m_runwayQueue;
     private int m_airCapacity;
     private int m_groundCapacity;
+    private boolean m_supportA380 = false;
     private double m_Lat;
     private double m_Long;
 
 
-    public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, double runwayTimeToTakeoff, int groundCapacity, int airCapacity, double Long, double Lat) {
+    public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, 
+    		double runwayTimeToTakeoff, int groundCapacity, int airCapacity, 
+    		int numRunways, boolean supportA380, double Long, double Lat) {
         m_airportName = name;
         m_inTheAir =  0;
         m_onTheGround = 0;
@@ -41,6 +44,9 @@ public class Airport implements EventHandler {
         m_runwayQueue = new LinkedList<Event>();
         m_airCapacity = airCapacity;
         m_groundCapacity = groundCapacity;
+        m_numRunways = numRunways;
+        m_freeRunways = new boolean[m_numRunways];
+        m_supportA380 = supportA380;
         m_Lat = Lat;
         m_Long = Long;
         Arrays.fill(m_freeRunways, true);

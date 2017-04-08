@@ -14,8 +14,8 @@ public class AirportSim {
     public static void main(String[] args) {
         //Implemented different airplanes air airports
         int numInitials = 100;
-        airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, -118.4, 33.9); //Los Angelas
-        airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, -97.6, 30.1); //Austin
+        airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
+        airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
 
         double[][] distanceMatrix = new double[airportList.length][airportList.length];
         for (int i = 0; i < airportList.length; i++) {
@@ -40,14 +40,14 @@ public class AirportSim {
             // The departure event, when handled, will automatically assign a new number of passengers randomly. Thus no need to assign randomly here.
             AirportEvent departureEvent_1 = new AirportEvent(0, airportList[0], AirportEvent.PLANE_DEPARTS, boe747_1, 0, 0);
             AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, boe747_2, 0, 0);
-            AirportEvent departureEvent_3 = new AirportEvent(0, airportList[2], AirportEvent.PLANE_DEPARTS, boe747_3, 0, 0);
-            AirportEvent departureEvent_4 = new AirportEvent(0, airportList[3], AirportEvent.PLANE_DEPARTS, boe747_4, 0, 0);
-            AirportEvent departureEvent_5 = new AirportEvent(0, airportList[4], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
+            //AirportEvent departureEvent_3 = new AirportEvent(0, airportList[2], AirportEvent.PLANE_DEPARTS, boe747_3, 0, 0);
+            //AirportEvent departureEvent_4 = new AirportEvent(0, airportList[3], AirportEvent.PLANE_DEPARTS, boe747_4, 0, 0);
+            //AirportEvent departureEvent_5 = new AirportEvent(0, airportList[4], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
             Simulator.schedule(departureEvent_1);
             Simulator.schedule(departureEvent_2);
-            Simulator.schedule(departureEvent_3);
-            Simulator.schedule(departureEvent_4);
-            Simulator.schedule(departureEvent_5);
+            //Simulator.schedule(departureEvent_3);
+            //Simulator.schedule(departureEvent_4);
+            //Simulator.schedule(departureEvent_5);
         }
         Simulator.run();
     }
