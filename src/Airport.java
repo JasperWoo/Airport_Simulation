@@ -24,9 +24,11 @@ public class Airport implements EventHandler {
     private Queue<Event> m_runwayQueue;
     private int m_airCapacity;
     private int m_groundCapacity;
+    private double m_Lat;
+    private double m_Long;
 
 
-    public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, double runwayTimeToTakeoff, int groundCapacity, int airCapacity) {
+    public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, double runwayTimeToTakeoff, int groundCapacity, int airCapacity, double Long, double Lat) {
         m_airportName = name;
         m_inTheAir =  0;
         m_onTheGround = 0;
@@ -39,6 +41,8 @@ public class Airport implements EventHandler {
         m_runwayQueue = new LinkedList<Event>();
         m_airCapacity = airCapacity;
         m_groundCapacity = groundCapacity;
+        m_Lat = Lat;
+        m_Long = Long;
         Arrays.fill(m_freeRunways, true);
     }
 
@@ -51,6 +55,12 @@ public class Airport implements EventHandler {
     public double getCirclingTime(){ return m_circlingTime; }
     public double getInTheAir(){ return m_inTheAir; }
     public double getOnTheGround(){ return m_onTheGround; }
+    public double getM_Lat() {
+        return m_Lat;
+    }
+    public double getM_Long(){
+        return m_Long;
+    }
 
     // check if one of runways is free
     private void checkRunways(Airplane curAirplane, AirportEvent airportEvent){
