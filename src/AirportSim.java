@@ -7,7 +7,7 @@ public class AirportSim {
 
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 100;
+        int numInitials = 50;
         airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
         airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
         for (int i = 0; i < airportList.length; i++) {
@@ -35,7 +35,7 @@ public class AirportSim {
 
             Simulator.schedule(departureEvent_1);
             Simulator.schedule(departureEvent_2);
-            
+
         }
         Simulator.run();
     }
