@@ -3,6 +3,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 public class Airport implements EventHandler {
 
@@ -149,13 +150,13 @@ public class Airport implements EventHandler {
                 
                 //Choose a random remote airport, get corresponding distance and flight time. Pass it to the  AirportEvent.
                 int numAirports = AirportSim.airportList.length;
+                int[] airportIndex = IntStream.range(0, numAirports).toArray();
                 int nextAirport;
                 // AUS and SEA don't take A380.
                 if (curAirplane.getName().equals("A380")){
-                    int[] selectAirports = {0,2,4};
                     do
-                        nextAirport = selectAirports[ThreadLocalRandom.current().nextInt(0,selectAirports.length)];
-                    while(nextAirport == curAirport); //Prevent next airport being the same as the current airport.
+                        nextAirport = airportIndex[ThreadLocalRandom.current().nextInt(0, numAirports)];
+                    while(nextAirport == curAirport && !AirportSim.airportList[nextAirport].m_supportA380); //Prevent next airport being the same as the current airport.
                 }
                 else{
                     do
