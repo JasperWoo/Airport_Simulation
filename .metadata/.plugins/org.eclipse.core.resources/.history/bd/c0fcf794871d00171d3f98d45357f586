@@ -1,0 +1,328 @@
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.JComboBox;
+
+public class AirportApp {
+
+	private JFrame frame;
+	private JTextField AirportName;
+	private JTextField RunTimetoLand;
+	private JTextField Requiredtimeonground;
+	private JTextField RunwayTimeToTakeoff;
+	private JTextField groundCapacity;
+	private JTextField airCapacity;
+	private JTextField NumberOfRunway;
+	private JTextField Longitude;
+	private JTextField Latitude;
+	private JLabel lblTimeonground;
+	private JLabel lblTimetotakeoff;
+	private JLabel lblGroundcapacity;
+	private JLabel lblAircapacity;
+	private JLabel lblNumberofrunway;
+	private JLabel lblSupportAtf;
+	private JLabel lblLongitude;
+	private JLabel lblLattitude;
+	public static int NumberOfAirport = 1;
+	static List<Airport> airportList = new ArrayList<Airport>();
+	private JLabel lblCurrentAirportNumber;
+	private JLabel CurrentAirportNumber;
+	private boolean IFsupportA380 = false;
+	private final Action action = new SwingAction();
+	private Airport selectedAirport;
+	private JTextField textField;
+	private JTextField textField_1;
+	private JTextField textField_2;
+	private JTextField textField_3;
+
+	Vector AirportNameList=new Vector();
+    
+	//x.add(1);
+	//x.add(2);
+	//public static Airport[] airportList = new Airport[1];
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					AirportApp window = new AirportApp();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public AirportApp() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.setBounds(100, 100, 633, 433);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		AirportName = new JTextField();
+		AirportName.setBounds(20, 50, 60, 26);
+		frame.getContentPane().add(AirportName);
+		AirportName.setColumns(10);
+		
+		RunTimetoLand = new JTextField();
+		RunTimetoLand.setBounds(104, 50, 40, 26);
+		frame.getContentPane().add(RunTimetoLand);
+		RunTimetoLand.setColumns(10);
+		
+		Requiredtimeonground = new JTextField();
+		Requiredtimeonground.setBounds(201, 50, 40, 26);
+		frame.getContentPane().add(Requiredtimeonground);
+		Requiredtimeonground.setColumns(10);
+		
+		RunwayTimeToTakeoff = new JTextField();
+		RunwayTimeToTakeoff.setBounds(322, 50, 40, 26);
+		frame.getContentPane().add(RunwayTimeToTakeoff);
+		RunwayTimeToTakeoff.setColumns(10);
+		
+		groundCapacity = new JTextField();
+		groundCapacity.setBounds(448, 50, 40, 26);
+		frame.getContentPane().add(groundCapacity);
+		groundCapacity.setColumns(10);
+		
+		airCapacity = new JTextField();
+		airCapacity.setBounds(20, 115, 40, 26);
+		frame.getContentPane().add(airCapacity);
+		airCapacity.setColumns(10);
+		
+		NumberOfRunway = new JTextField();
+		NumberOfRunway.setBounds(104, 115, 40, 26);
+		frame.getContentPane().add(NumberOfRunway);
+		NumberOfRunway.setColumns(10);
+		
+		Longitude = new JTextField();
+		Longitude.setBounds(322, 115, 80, 26);
+		frame.getContentPane().add(Longitude);
+		Longitude.setColumns(10);
+		
+		Latitude = new JTextField();
+		Latitude.setBounds(438, 115, 80, 26);
+		frame.getContentPane().add(Latitude);
+		Latitude.setColumns(10);
+		
+		JLabel lblName = new JLabel("Name");
+		lblName.setBounds(20, 20, 40, 30);
+		frame.getContentPane().add(lblName);
+		
+		JLabel lblTimetoland = new JLabel("TimeToLand");
+		lblTimetoland.setBounds(84, 27, 83, 16);
+		frame.getContentPane().add(lblTimetoland);
+		
+		lblTimeonground = new JLabel("TimeOnGround");
+		lblTimeonground.setBounds(191, 27, 97, 16);
+		frame.getContentPane().add(lblTimeonground);
+		
+		lblTimetotakeoff = new JLabel("TimeToTakeoff");
+		lblTimetotakeoff.setBounds(312, 27, 102, 16);
+		frame.getContentPane().add(lblTimetotakeoff);
+		
+		lblGroundcapacity = new JLabel("GroundCapacity");
+		lblGroundcapacity.setBounds(438, 27, 110, 16);
+		frame.getContentPane().add(lblGroundcapacity);
+		
+		lblAircapacity = new JLabel("AirCapacity");
+		lblAircapacity.setBounds(20, 87, 97, 16);
+		frame.getContentPane().add(lblAircapacity);
+		
+		lblNumberofrunway = new JLabel("NumberOfRunway");
+		lblNumberofrunway.setBounds(104, 87, 123, 16);
+		frame.getContentPane().add(lblNumberofrunway);
+		
+		lblSupportAtf = new JLabel("Support A380");
+		lblSupportAtf.setBounds(230, 87, 132, 16);
+		frame.getContentPane().add(lblSupportAtf);
+		
+		lblLongitude = new JLabel("Longitude");
+		lblLongitude.setBounds(332, 87, 80, 16);
+		frame.getContentPane().add(lblLongitude);
+		
+		lblLattitude = new JLabel("Lattitude");
+		lblLattitude.setBounds(438, 87, 70, 16);
+		frame.getContentPane().add(lblLattitude);
+		
+		JButton btnAddAirport = new JButton("Add Airport");
+		btnAddAirport.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		btnAddAirport.setForeground(Color.GREEN);
+		btnAddAirport.setBackground(Color.GREEN);
+		btnAddAirport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String newAirport_name = AirportName.getText();
+				int newAirport_RuntimeToLand  = Integer.parseInt(RunTimetoLand.getText());
+				int newAirport_Requiredtimeonground = Integer.parseInt(Requiredtimeonground.getText());
+				int newAirport_RunwayTimeToTakeoff = Integer.parseInt(RunwayTimeToTakeoff.getText());
+				int newAirport_groundCapacity = Integer.parseInt(groundCapacity.getText());
+				int newAirport_airCapacity = Integer.parseInt(airCapacity.getText());
+				int newAirport_NumberOfRunway = Integer.parseInt(NumberOfRunway.getText());
+				//IfsupportA380
+				int newAirport_Longitude = Integer.parseInt(Longitude.getText());
+				int newAirport_Latitude = Integer.parseInt(Latitude.getText());
+				
+				
+				//Airport newAirport = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
+				Airport newAirport = new Airport(newAirport_name, newAirport_RuntimeToLand,newAirport_Requiredtimeonground,
+						newAirport_RunwayTimeToTakeoff, newAirport_groundCapacity, newAirport_airCapacity, 
+						newAirport_NumberOfRunway, IFsupportA380, newAirport_Longitude, newAirport_Latitude);
+				airportList.add(newAirport);
+				CurrentAirportNumber.setText(Integer.toString(airportList.size()));
+				
+			}
+		});
+		btnAddAirport.setBounds(530, 62, 97, 44);
+		frame.getContentPane().add(btnAddAirport);
+		
+		lblCurrentAirportNumber = new JLabel("Current Airport Number is");
+		lblCurrentAirportNumber.setBounds(20, 157, 169, 16);
+		frame.getContentPane().add(lblCurrentAirportNumber);
+		
+		CurrentAirportNumber = new JLabel("0");
+		CurrentAirportNumber.setBounds(201, 157, 61, 16);
+		frame.getContentPane().add(CurrentAirportNumber);
+		
+		JCheckBox SupportA380 = new JCheckBox("");
+		SupportA380.setAction(action);
+		SupportA380.setSelected(true);
+		SupportA380.setBounds(240, 115, 28, 23);
+		frame.getContentPane().add(SupportA380);
+		
+		textField = new JTextField();
+		textField.setBounds(129, 209, 80, 26);
+		frame.getContentPane().add(textField);
+		textField.setColumns(10);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(269, 218, 40, 26);
+		frame.getContentPane().add(textField_1);
+		textField_1.setColumns(10);
+		
+		textField_2 = new JTextField();
+		textField_2.setBounds(383, 218, 40, 26);
+		frame.getContentPane().add(textField_2);
+		textField_2.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Add Airplane");
+		btnNewButton.setForeground(Color.ORANGE);
+		btnNewButton.setBounds(510, 228, 117, 29);
+		frame.getContentPane().add(btnNewButton);
+		
+		JLabel lblNewLabel = new JLabel("New Airport Information");
+		lblNewLabel.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
+		lblNewLabel.setBounds(20, 6, 208, 16);
+		frame.getContentPane().add(lblNewLabel);
+		
+		JLabel lblNewLabel_1 = new JLabel("New Airplane Information");
+		lblNewLabel_1.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
+		lblNewLabel_1.setBounds(20, 186, 170, 16);
+		frame.getContentPane().add(lblNewLabel_1);
+		
+		JLabel lblAirplaneName = new JLabel("Type the name ");
+		lblAirplaneName.setBounds(20, 214, 124, 16);
+		frame.getContentPane().add(lblAirplaneName);
+		
+		JCheckBox chckbxNewCheckBox = new JCheckBox("A380");
+		chckbxNewCheckBox.setBounds(129, 229, 128, 23);
+		frame.getContentPane().add(chckbxNewCheckBox);
+		
+		JLabel lblSpeed = new JLabel("Speed");
+		lblSpeed.setBounds(221, 223, 46, 16);
+		frame.getContentPane().add(lblSpeed);
+		
+		JLabel lblCapacity = new JLabel("Capacity");
+		lblCapacity.setBounds(322, 219, 61, 16);
+		frame.getContentPane().add(lblCapacity);
+		
+		JLabel lblTypeTheName = new JLabel("or choose A380");
+		lblTypeTheName.setBounds(19, 233, 222, 16);
+		frame.getContentPane().add(lblTypeTheName);
+		
+		JLabel lblCurrentAirplaneNumber = new JLabel("Current Airplane number is ");
+		lblCurrentAirplaneNumber.setBounds(20, 282, 189, 16);
+		frame.getContentPane().add(lblCurrentAirplaneNumber);
+		
+		JLabel lblAirplaneNumber = new JLabel("0");
+		lblAirplaneNumber.setBounds(201, 282, 61, 16);
+		frame.getContentPane().add(lblAirplaneNumber);
+		
+		JLabel lblNewLabel_2 = new JLabel("Delay time");
+		lblNewLabel_2.setBounds(19, 261, 98, 16);
+		frame.getContentPane().add(lblNewLabel_2);
+		
+		textField_3 = new JTextField();
+		textField_3.setBounds(97, 256, 46, 26);
+		frame.getContentPane().add(textField_3);
+		textField_3.setColumns(10);
+		
+		JLabel lblInitialDepartingAirport = new JLabel("Initial departing Airport");
+		lblInitialDepartingAirport.setBounds(155, 261, 154, 16);
+		frame.getContentPane().add(lblInitialDepartingAirport);
+		
+		//set the dropdown list name
+		String[] airportNameList = new String[airportList.size()];
+		for (int i = 0; i < airportList.size(); i++) {
+			airportNameList[i] = airportList.get(i).getName();
+		}
+		
+		final DefaultComboBoxModel SelectAirportModel = new DefaultComboBoxModel(AirportNameList);
+		JComboBox SelectAirport = new JComboBox(SelectAirportModel);
+		SelectAirport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				selectedAirport = airportList.get(SelectAirport.getSelectedIndex());
+			}
+		});
+		SelectAirport.setBounds(322, 257, 92, 27);
+		frame.getContentPane().add(SelectAirport);
+		
+
+		
+		
+	}
+	
+	private class SwingAction extends AbstractAction {
+		public SwingAction() {
+			putValue(NAME, "SwingAction");
+			putValue(SHORT_DESCRIPTION, "Some short description");
+		}
+		public void actionPerformed(ActionEvent e) {
+			JCheckBox cbA380 = (JCheckBox) e.getSource();
+			if (cbA380.isSelected()) {
+				IFsupportA380 = true;
+			} else {
+				IFsupportA380 = false;
+			}
+			
+		}
+	}
+}
