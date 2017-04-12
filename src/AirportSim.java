@@ -13,6 +13,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -83,11 +85,15 @@ public class AirportSim extends JFrame{
 				try {
 					AirportSim window = new AirportSim();
 					window.frame.setVisible(true);
+					PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+					System.setOut(out);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
+
 		});
+		
 	}
 
 	/**
