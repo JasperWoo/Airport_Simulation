@@ -24,7 +24,7 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JComboBox;
 
-public class AirportSim {
+public class AirportSim extends JFrame{
 
 	private JFrame frame;
 	private JTextField AirportName;
@@ -60,9 +60,9 @@ public class AirportSim {
 	private JTextField airplaneDelaytime;
 	private String newAirplaneName;
 	private int CurrentAirplaneNumber = 0;
-	public static Airport[] airportList = new Airport[2];
-	public static double[][] distanceMatrix = new double[2][2];
-
+	public static Airport[] airportList;
+	public static double[][] distanceMatrix;
+	
 	Vector AirportNameList = new Vector();
 	Vector EventList = new Vector();
 	final DefaultComboBoxModel SelectAirportModel = new DefaultComboBoxModel(AirportNameList);
@@ -94,10 +94,13 @@ public class AirportSim {
 	 * Create the application.
 	 */
 	public AirportSim() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initialize();
 
 	}
-
+	
+	
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -107,6 +110,8 @@ public class AirportSim {
 		EventListModel.addElement(new String("PLANE_DEPARTS")); 
 		EventListModel.addElement(new String("PLANE_TAKEOFF"));
 		EventListModel.addElement(new String("PLANE_LANDED"));
+		
+		
 		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 633, 433);
@@ -327,7 +332,6 @@ public class AirportSim {
 				airplaneSpeed.setText("");
 				airplaneCapacity.setText("");
 				airplaneDelaytime.setText("");
-				airplaneEventText.setText("");
 				
 				
 			}
@@ -477,7 +481,7 @@ public class AirportSim {
 		public void actionPerformed(ActionEvent e) {
 			JCheckBox cb_airplaneIf380 = (JCheckBox) e.getSource();
 			if (cb_airplaneIf380.isSelected()) {
-				airplaneName.setEnabled(false);
+				//airplaneName.setEnabled(false);
 			} else {
 				airplaneName.setEnabled(true);
 			}
