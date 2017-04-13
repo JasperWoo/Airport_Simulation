@@ -25,6 +25,7 @@ public class Airport implements EventHandler {
     private Queue<Event> m_runwayQueue;
     private int m_airCapacity;
     private int m_groundCapacity;
+
     private boolean m_supportA380 = false;
     private double m_Lat;
     private double m_Long;
@@ -54,8 +55,9 @@ public class Airport implements EventHandler {
     }
 
     public String getName() { return m_airportName;}
-    public int getGroundCapacity() {return m_groundCapacity;}
-
+    public int getGroundCapacity() { return m_groundCapacity;}
+    public boolean isSupportA380() { return m_supportA380;}
+    public void setSupportA380(boolean m_supportA380) { this.m_supportA380 = m_supportA380;}
     public int getAirCapacity() {return m_airCapacity;}
     public int getNumArrived(){ return m_numArrived; }
     public int getNumDeparted(){ return m_numDeparted; }

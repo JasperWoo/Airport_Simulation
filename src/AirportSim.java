@@ -114,7 +114,7 @@ public class AirportSim extends JFrame{
         EventListModel.addElement(new String("PLANE_LANDED"));
 
         frame = new JFrame();
-        frame.setBounds(100, 100, 1000, 433);
+        frame.setBounds(100, 100, 1000, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
@@ -208,17 +208,25 @@ public class AirportSim extends JFrame{
         frame.getContentPane().add(NumberOfAirportFromFile);
         NumberOfAirportFromFile .setColumns(10);
 
+        JLabel lblCurrentAirplaneNumber = new JLabel("Current Airplane number is ");
+        lblCurrentAirplaneNumber.setBounds(20, 282, 189, 16);
+        frame.getContentPane().add(lblCurrentAirplaneNumber);
+
+        JLabel lblAirplaneNumber = new JLabel("0");
+        lblAirplaneNumber.setBounds(201, 282, 61, 16);
+        frame.getContentPane().add(lblAirplaneNumber);
+
         JLabel lblNumberOfAirportFromFile = new JLabel("Airport number to read from file (<100)");
         lblNumberOfAirportFromFile.setBounds(690, 20, 270, 30);
         frame.getContentPane().add(lblNumberOfAirportFromFile);
 
         NumberOfAirplaneFromFile = new JTextField();
-        NumberOfAirplaneFromFile.setBounds(690, 400, 80, 26);
+        NumberOfAirplaneFromFile.setBounds(690, 210, 80, 26);
         frame.getContentPane().add(NumberOfAirplaneFromFile);
         NumberOfAirplaneFromFile .setColumns(10);
 
-        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number to read from file (<10)");
-        lblNumberOfAirplaneFromFile.setBounds(690, 400, 270, 30);
+        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number per airport read from file (<10)");
+        lblNumberOfAirplaneFromFile.setBounds(690, 180, 330, 30);
         frame.getContentPane().add(lblNumberOfAirplaneFromFile);
 
         JButton btnAdd50Airport = new JButton("Add Airports From File");
@@ -277,31 +285,39 @@ public class AirportSim extends JFrame{
         });
         btnAdd50Airport.setBounds(690, 80, 200, 44);
         frame.getContentPane().add(btnAdd50Airport);
-
-        JButton btnAdd50Airplane = new JButton("Add Airports From File");
+        //add airplane from file
+        //this is for option reading airplanes from file
+        //then this function will add certain number of airplanes on airports read from file
+        //set the number of airplane n per airport
+        //if the airport support A380, add n general planes and n A380 planes
+        JButton btnAdd50Airplane = new JButton("Add Airplanes From File");
         btnAdd50Airplane.setFont(new Font("Lucida Grande", Font.BOLD, 14));
-        btnAdd50Airplane.setForeground(Color.GREEN);
-        btnAdd50Airplane.setBackground(Color.GREEN);
+        btnAdd50Airplane.setForeground(Color.ORANGE);
+        btnAdd50Airplane.setBackground(Color.ORANGE);
         btnAdd50Airplane.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int numInitials = Integer.parseInt(NumberOfAirplaneFromFile.getText());
                 for (int i = 0; i < numInitials; i++) {
                     for(int j = 0; j<Integer.parseInt(NumberOfAirportFromFile.getText()); j++) {
                         Airplane boe747 = new Airplane("Boe747", 614, 416);
-                        AirportEvent departureEvent_1 = new AirportEvent(0, airportList[0], AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
+                        AirportEvent departureEvent_1 = new AirportEvent(0, airportArrayList.get(j), AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
                         Simulator.schedule(departureEvent_1);
+                        CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
+                        lblAirplaneNumber.setText(Integer.toString(CurrentAirplaneNumber));
 
-                        if (airportArrayList.get(j).getisSupportA380()) {
+                        if (airportArrayList.get(j).isSupportA380()) {
                             Airplane a380 = new Airplane("A380", 634, 853);
-                            AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
+                            AirportEvent departureEvent_2 = new AirportEvent(0, airportArrayList.get(j), AirportEvent.PLANE_DEPARTS, a380, 0, 0);
                             Simulator.schedule(departureEvent_2);
+                            CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
+                            lblAirplaneNumber.setText(Integer.toString(CurrentAirplaneNumber));
                             // The departure event, when handled, will automatically assign a new number of passengers randomly. Thus no need to assign randomly here.
                         }
                     }
                 }
             }
         });
-        btnAdd50Airplane.setBounds(690, 80, 200, 44);
+        btnAdd50Airplane.setBounds(690, 240, 200, 44);
         frame.getContentPane().add(btnAdd50Airplane);
 
         JButton btnAddAirport = new JButton("Add Airport");
@@ -382,13 +398,8 @@ public class AirportSim extends JFrame{
         airplaneEvent.setBounds(440, 200, 169, 16);
         frame.getContentPane().add(airplaneEvent);
 
-        JLabel lblCurrentAirplaneNumber = new JLabel("Current Airplane number is ");
-        lblCurrentAirplaneNumber.setBounds(20, 282, 189, 16);
-        frame.getContentPane().add(lblCurrentAirplaneNumber);
 
-        JLabel lblAirplaneNumber = new JLabel("0");
-        lblAirplaneNumber.setBounds(201, 282, 61, 16);
-        frame.getContentPane().add(lblAirplaneNumber);
+
 
         JButton btnNewButton = new JButton("Add Airplane");
         btnNewButton.addActionListener(new ActionListener() {
@@ -431,7 +442,7 @@ public class AirportSim extends JFrame{
             }
         });
         btnNewButton.setForeground(Color.ORANGE);
-        btnNewButton.setBounds(510, 260, 117, 29);
+        btnNewButton.setBounds(510, 260, 117, 44);
         frame.getContentPane().add(btnNewButton);
 
         JLabel lblNewLabel = new JLabel("New Airport Information");
@@ -504,15 +515,18 @@ public class AirportSim extends JFrame{
                 totalRunTime = Double.parseDouble(textSetRuntime.getText());
             }
         });
-        textSetRuntime.setBounds(201, 315, 130, 26);
+        textSetRuntime.setBounds(201, 380, 130, 26);
         frame.getContentPane().add(textSetRuntime);
         textSetRuntime.setColumns(10);
 
         lblNewLabel_3 = new JLabel("Set total runtime");
-        lblNewLabel_3.setBounds(84, 320, 126, 16);
+        lblNewLabel_3.setBounds(84, 380, 126, 16);
         frame.getContentPane().add(lblNewLabel_3);
 
         btnRun = new JButton("RUN");
+        btnRun.setFont(new Font("Lucida Grande", Font.BOLD, 24));
+        btnRun.setForeground(Color.RED);
+        btnRun.setBackground(Color.RED);
         btnRun.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // run the simulation here!!!
@@ -536,7 +550,7 @@ public class AirportSim extends JFrame{
                 Simulator.run();
             }
         });
-        btnRun.setBounds(371, 315, 117, 29);
+        btnRun.setBounds(371, 380, 117, 40);
         frame.getContentPane().add(btnRun);
     }
 
