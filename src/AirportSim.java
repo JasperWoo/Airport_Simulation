@@ -17,7 +17,10 @@ import javax.swing.Action;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JComboBox;
-
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 public class AirportSim extends JFrame{
 
     private JFrame frame;
@@ -108,7 +111,7 @@ public class AirportSim extends JFrame{
         EventListModel.addElement(new String("PLANE_LANDED"));
 
         frame = new JFrame();
-        frame.setBounds(100, 100, 633, 433);
+        frame.setBounds(100, 100, 733, 433);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
@@ -196,6 +199,66 @@ public class AirportSim extends JFrame{
         lblLattitude = new JLabel("Lattitude");
         lblLattitude.setBounds(438, 87, 70, 16);
         frame.getContentPane().add(lblLattitude);
+
+        JButton btnAdd50Airport = new JButton("Add 50 Airports");
+        btnAdd50Airport.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+        btnAdd50Airport.setForeground(Color.GREEN);
+        btnAdd50Airport.setBackground(Color.GREEN);
+        btnAdd50Airport.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //Airport newAirport = new Airport(newAirport_name, newAirport_RuntimeToLand,
+                //        newAirport_Requiredtimeonground, newAirport_RunwayTimeToTakeoff, newAirport_groundCapacity,
+                //        newAirport_airCapacity, newAirport_NumberOfRunway, IFsupportA380, newAirport_Longitude,
+                //        newAirport_Latitude);
+                int currentAirportNumber = airportArrayList.size();
+
+                int NUM_addAIRPORTS = 50;
+                String csvAirports = "data_airports.csv";
+                BufferedReader br = null;
+                String line = "";
+                String csvSeparator = ",";
+
+                try {
+                    br = new BufferedReader(new FileReader(csvAirports));
+                    line = br.readLine(); // Skip the first line
+                    for (int i=0;i<NUM_addAIRPORTS;i++){
+                        line = br.readLine();
+                        // use comma as separator
+                        String [] values = line.split(csvSeparator)  ;
+                        airportArrayList.add(new Airport(values[0], Double.valueOf(values[1]), Double.valueOf(values[2]), Double.valueOf(values[3]), Integer.valueOf(values[4]), Integer.valueOf(values[5]), Integer.valueOf(values[6]), Boolean.valueOf(values[7]), Double.valueOf(values[8]), Double.valueOf(values[9]))); //Los Angelas
+                    }
+                }  catch (FileNotFoundException eread){
+                    eread.printStackTrace();
+                }  catch (IOException e){
+                    eread.printStackTrace();
+                }  finally {
+                    if(br!=null){
+                        try{
+                            System.out.println("The number of airports specified in the code may exceed the data available!");
+                            br.close();
+                        } catch(IOException eread){
+                            eread.printStackTrace();
+                        }
+                    }
+                }
+
+
+                airportArrayList.add(new Airport("EWR",0.1,0.1,0.1,10,10,10,true,-100,100));
+                airportArrayList.add(new Airport("NYC",0.1,0.1,0.1,10,10,10,true,-100,100));
+
+                CurrentAirportNumber.setText(Integer.toString(airportArrayList.size()));
+                // @Override
+                // public void actionPerformed(ActionEvent ae) {
+                for (int i=currentAirportNumber; i < currentAirportNumber+NUM_addAIRPORTS;i++) {
+                    SelectAirportModel.addElement(airportArrayList.get(i).getName());
+                }
+                // }
+
+
+            }
+        });
+        btnAdd50Airport.setBounds(630, 62, 97, 44);
+        frame.getContentPane().add(btnAdd50Airport);
 
         JButton btnAddAirport = new JButton("Add Airport");
         btnAddAirport.setFont(new Font("Lucida Grande", Font.BOLD, 14));
