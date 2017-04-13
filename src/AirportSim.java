@@ -45,7 +45,7 @@ public class AirportSim extends JFrame{
     private JLabel lblLongitude;
     private JLabel lblLattitude;
     private JLabel airplaneEvent;
-    public static int NumberOfAirport = 1;
+    public static int NumberOfAirportBeforReadingFiles = 0;
     static List<Airport> airportArrayList = new ArrayList<Airport>();
     private JLabel lblCurrentAirportNumber;
     private JLabel CurrentAirportNumber;
@@ -225,7 +225,7 @@ public class AirportSim extends JFrame{
         frame.getContentPane().add(NumberOfAirplaneFromFile);
         NumberOfAirplaneFromFile .setColumns(10);
 
-        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number per airport read from file (<10)");
+        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number per airport read from file (<11)");
         lblNumberOfAirplaneFromFile.setBounds(690, 180, 330, 30);
         frame.getContentPane().add(lblNumberOfAirplaneFromFile);
 
@@ -240,6 +240,7 @@ public class AirportSim extends JFrame{
                 //        newAirport_airCapacity, newAirport_NumberOfRunway, IFsupportA380, newAirport_Longitude,
                 //        newAirport_Latitude);
                 int currentAirportNumber = airportArrayList.size();
+                NumberOfAirportBeforReadingFiles = currentAirportNumber;
 
                 int NUM_addAIRPORTS = Integer.parseInt(NumberOfAirportFromFile.getText());;
                 String csvAirports = "data_airports.csv";
@@ -300,14 +301,14 @@ public class AirportSim extends JFrame{
                 for (int i = 0; i < numInitials; i++) {
                     for(int j = 0; j<Integer.parseInt(NumberOfAirportFromFile.getText()); j++) {
                         Airplane boe747 = new Airplane("Boe747", 614, 416);
-                        AirportEvent departureEvent_1 = new AirportEvent(0, airportArrayList.get(j), AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
+                        AirportEvent departureEvent_1 = new AirportEvent(0, airportArrayList.get(j+NumberOfAirportBeforReadingFiles), AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
                         Simulator.schedule(departureEvent_1);
                         CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
                         lblAirplaneNumber.setText(Integer.toString(CurrentAirplaneNumber));
 
                         if (airportArrayList.get(j).isSupportA380()) {
                             Airplane a380 = new Airplane("A380", 634, 853);
-                            AirportEvent departureEvent_2 = new AirportEvent(0, airportArrayList.get(j), AirportEvent.PLANE_DEPARTS, a380, 0, 0);
+                            AirportEvent departureEvent_2 = new AirportEvent(0, airportArrayList.get(j+NumberOfAirportBeforReadingFiles), AirportEvent.PLANE_DEPARTS, a380, 0, 0);
                             Simulator.schedule(departureEvent_2);
                             CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
                             lblAirplaneNumber.setText(Integer.toString(CurrentAirplaneNumber));
