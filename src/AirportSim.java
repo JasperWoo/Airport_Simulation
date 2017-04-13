@@ -1,17 +1,50 @@
 //Peijun Wu
-import java.util.concurrent.ThreadLocalRandom;
+
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class AirportSim {
-    public static Airport[] airportList = new Airport[2];
+    public static final int NUM_AIRPORTS = 50;     // Our data has a total of 128 airports.
+    public static Airport[] airportList = new Airport[NUM_AIRPORTS];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
 
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 50;
-        airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
-        airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
-        for (int i = 0; i < airportList.length; i++) {
-            for (int j = i; j < airportList.length; j++) {
+        int numInitials = 10;
+
+        String csvAirports = "data_airports.csv";
+        BufferedReader br = null;
+        String line = "";
+        String csvSeparator = ",";
+
+        try {
+            br = new BufferedReader(new FileReader(csvAirports));
+            line = br.readLine(); // Skip the first line
+            for (int i=0;i<NUM_AIRPORTS;i++){
+                line = br.readLine();
+                // use comma as separator
+                String [] values = line.split(csvSeparator)  ;
+                airportList[i] = new Airport(values[0], Double.valueOf(values[1]), Double.valueOf(values[2]), Double.valueOf(values[3]), Integer.valueOf(values[4]), Integer.valueOf(values[5]), Integer.valueOf(values[6]), Boolean.valueOf(values[7]), Double.valueOf(values[8]), Double.valueOf(values[9])); //Los Angelas
+            }
+        }  catch (FileNotFoundException e){
+            e.printStackTrace();
+        }  catch (IOException e){
+            e.printStackTrace();
+        }  finally {
+            if(br!=null){
+                try{
+                    System.out.println("The number of airports specified in the code may exceed the data available!");
+                    br.close();
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (int i = 0; i < NUM_AIRPORTS; i++) {
+            for (int j = i; j < NUM_AIRPORTS; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                 }
@@ -24,18 +57,18 @@ public class AirportSim {
         Simulator.stopAt(1000);
         //In each loop, new planes will depart at every airport
         for (int i = 0; i < numInitials; i++) {
-            Airplane boe747_1 = new Airplane("Boe747", 614, 416);
-            Airplane boe747_2 = new Airplane("Boe747", 614, 416);
-            Airplane boe747_3 = new Airplane("Boe747", 614, 416);
-            Airplane boe747_4 = new Airplane("Boe747", 614, 416);
-            Airplane a380 = new Airplane("A380_1", 634, 853);
-            // The departure event, when handled, will automatically assign a new number of passengers randomly. Thus no need to assign randomly here.
-            AirportEvent departureEvent_1 = new AirportEvent(0, airportList[0], AirportEvent.PLANE_DEPARTS, boe747_1, 0, 0);
-            AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, boe747_2, 0, 0);
+            for(int j = 0; j<NUM_AIRPORTS; j++) {
+                Airplane boe747 = new Airplane("Boe747", 614, 416);
+                AirportEvent departureEvent_1 = new AirportEvent(0, airportList[0], AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
+                Simulator.schedule(departureEvent_1);
 
-            Simulator.schedule(departureEvent_1);
-            Simulator.schedule(departureEvent_2);
-
+                if (airportList[j].isSupportA380()) {
+                    Airplane a380 = new Airplane("A380", 634, 853);
+                    AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
+                    Simulator.schedule(departureEvent_2);
+                    // The departure event, when handled, will automatically assign a new number of passengers randomly. Thus no need to assign randomly here.
+                }
+            }
         }
         Simulator.run();
     }
