@@ -20,4 +20,5 @@ public class AirportEvent extends Event {
     public Airplane getPlane(){ return m_plane;}
     public int getNumPassengers(){ return m_numPassengers;}
     public double getLastEventTime(){ return m_lastEventTime;}
+    
 }

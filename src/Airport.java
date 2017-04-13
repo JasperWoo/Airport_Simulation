@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+import mpi.MPI;
+import test.MPIUtil;
+
 public class Airport implements EventHandler {
 
     //TODO add landing and takeoff queues, random variables
@@ -28,11 +31,12 @@ public class Airport implements EventHandler {
     private boolean m_supportA380 = false;
     private double m_Lat;
     private double m_Long;
+    private int m_LPid;
 
 
     public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, 
     		double runwayTimeToTakeoff, int groundCapacity, int airCapacity, 
-    		int numRunways, boolean supportA380, double Long, double Lat) {
+    		int numRunways, boolean supportA380, int LPid, double Long, double Lat) {
         m_airportName = name;
         m_inTheAir =  0;
         m_onTheGround = 0;
@@ -50,6 +54,7 @@ public class Airport implements EventHandler {
         m_supportA380 = supportA380;
         m_Lat = Lat;
         m_Long = Long;
+        m_LPid = LPid;
         Arrays.fill(m_freeRunways, true);
     }
 
@@ -181,19 +186,38 @@ public class Airport implements EventHandler {
                 if(checkDestCapacity(destination)){
                 		m_onTheGround--;
                 		
-                		//reset destination
+                		//reset airplane's destination to -1
                 		curAirplane.destination = -1;
+                		
                     double dist = AirportSim.distanceMatrix[curAirport][destination];
                     double m_flightTime = dist / curAirplane.getSpeed();
-
+                    double delay = m_runwayTimeToTakeoff + m_flightTime;
+                   
                     //This process does not take up the runway, no need to check.
-                    AirportEvent landingEvent = new AirportEvent(m_runwayTimeToTakeoff+ m_flightTime,  AirportSim.airportList[destination],
+                    AirportEvent landingEvent = new AirportEvent(delay,  AirportSim.airportList[destination],
                             AirportEvent.PLANE_ARRIVES, curAirplane, airEvent.getNumPassengers(), airEvent.getTime()); //The number of passengers is just the newNumPassengers
                     System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight " + curAirplane.getName() + " takes off at airport " +
                             m_airportName + " and flies to " + AirportSim.airportList[destination].getName() + ".");
                     
-                    Simulator.schedule(landingEvent);
-                    continueRunway( airEvent);  
+                    int destId = AirportSim.airportList[destination].getM_LPid();
+                    int startId = this.getM_LPid();
+                    
+                    //if destination is in the same LP, then schedule it,
+                    //otherwise send message to that LP.
+                    
+                    //Simulator.schedule(landingEvent);
+                    
+                    if (startId == destId) {
+                        Simulator.schedule(landingEvent);
+                    }
+                    else {
+                    		double startTime = Simulator.getCurrentTime();
+                    		double airplaneType = curAirplane.getName().equals("A380_1")? 1 : 0;
+                    		double passengerNum = airEvent.getNumPassengers();
+                    		Simulator.updateSendBuf(startTime, delay, (double)destination, airplaneType, passengerNum);
+                    }
+                    continueRunway(airEvent);  
+                    
                     
                 }else{
                 		//if destination capacity is not enough, delay it by adding it to queue.
@@ -204,4 +228,8 @@ public class Airport implements EventHandler {
                 break;
         }
     }
+
+	public int getM_LPid() {
+		return m_LPid;
+	}
 }
