@@ -48,6 +48,7 @@ public class AirportSim {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                 }
+                // calculate the pairwise distances
                 distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
                         Math.sin(Math.toRadians(airportList[j].getM_Lat())) +
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
