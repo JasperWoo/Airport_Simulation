@@ -35,7 +35,6 @@ public class AirportSim extends JFrame{
     private JTextField Latitude;
     private JTextField NumberOfAirportFromFile;
     private JTextField NumberOfAirplaneFromFile;
-    private JLabel lblNumberOfAirportFromFile;
     private JLabel lblTimeonground;
     private JLabel lblTimetotakeoff;
     private JLabel lblGroundcapacity;
@@ -45,7 +44,6 @@ public class AirportSim extends JFrame{
     private JLabel lblLongitude;
     private JLabel lblLattitude;
     private JLabel airplaneEvent;
-    public static int NumberOfAirport = 1;
     static List<Airport> airportArrayList = new ArrayList<Airport>();
     private JLabel lblCurrentAirportNumber;
     private JLabel CurrentAirportNumber;
@@ -56,7 +54,6 @@ public class AirportSim extends JFrame{
     private JTextField airplaneName;
     private JTextField airplaneSpeed;
     private JTextField airplaneCapacity;
-    private JTextField airplaneEventText;
     private JTextField airplaneDelaytime;
     private String newAirplaneName;
     private int CurrentAirplaneNumber = 0;
