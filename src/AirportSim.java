@@ -226,7 +226,7 @@ public class AirportSim extends JFrame{
         frame.getContentPane().add(NumberOfAirplaneFromFile);
         NumberOfAirplaneFromFile .setColumns(10);
 
-        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number per airport read from file (<10)");
+        JLabel lblNumberOfAirplaneFromFile = new JLabel("Airplane number per airport read from file (<11)");
         lblNumberOfAirplaneFromFile.setBounds(690, 180, 330, 30);
         frame.getContentPane().add(lblNumberOfAirplaneFromFile);
 
@@ -480,8 +480,8 @@ public class AirportSim extends JFrame{
         frame.getContentPane().add(airplaneDelaytime);
         airplaneDelaytime.setColumns(10);
 
-        JLabel lblInitialDepartingAirport = new JLabel("Initial departing Airport");
-        lblInitialDepartingAirport.setBounds(155, 261, 154, 16);
+        JLabel lblInitialDepartingAirport = new JLabel("Initial Airport");
+        lblInitialDepartingAirport.setBounds(185, 261, 154, 16);
         frame.getContentPane().add(lblInitialDepartingAirport);
 
         JComboBox SelectAirport = new JComboBox(SelectAirportModel);
