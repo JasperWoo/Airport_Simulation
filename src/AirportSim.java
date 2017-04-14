@@ -200,7 +200,7 @@ public class AirportSim extends JFrame{
         lblLongitude.setBounds(332, 87, 80, 16);
         frame.getContentPane().add(lblLongitude);
 
-        lblLattitude = new JLabel("Lattitude");
+        lblLattitude = new JLabel("Latitude");
         lblLattitude.setBounds(438, 87, 70, 16);
         frame.getContentPane().add(lblLattitude);
 
