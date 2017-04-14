@@ -576,6 +576,8 @@ public class AirportSim extends JFrame{
         public void actionPerformed(ActionEvent e) {
             JCheckBox cb_airplaneIf380 = (JCheckBox) e.getSource();
             if (cb_airplaneIf380.isSelected()) {
+                airplaneName.setEnabled(false);
+            }else{
                 airplaneName.setEnabled(true);
             }
 
