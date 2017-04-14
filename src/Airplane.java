@@ -7,6 +7,7 @@ public class Airplane {
     private String m_name;
     private int m_speed;
     private int m_numberPassengers;
+    // which runway is this airplane in
     public int runway_number;
     public int destination;
 
