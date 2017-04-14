@@ -441,7 +441,7 @@ public class AirportSim extends JFrame{
         btnNewButton.setBounds(410, 260, 250, 44);
         frame.getContentPane().add(btnNewButton);
 
-        JLabel lblNewLabel = new JLabel("Too ADD New Airport");
+        JLabel lblNewLabel = new JLabel("To ADD New Airport");
         lblNewLabel.setFont(new Font("Lucida Grande",Font.BOLD, 13));
         lblNewLabel.setBounds(20, 6, 208, 16);
         frame.getContentPane().add(lblNewLabel);
