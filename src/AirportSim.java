@@ -210,11 +210,11 @@ public class AirportSim extends JFrame{
         NumberOfAirportFromFile .setColumns(10);
 
         JLabel lblCurrentAirplaneNumber = new JLabel("Current Airplane number is ");
-        lblCurrentAirplaneNumber.setBounds(20, 282, 189, 16);
+        lblCurrentAirplaneNumber.setBounds(20, 302, 189, 16);
         frame.getContentPane().add(lblCurrentAirplaneNumber);
 
         JLabel lblAirplaneNumber = new JLabel("0");
-        lblAirplaneNumber.setBounds(201, 282, 61, 16);
+        lblAirplaneNumber.setBounds(201, 302, 61, 16);
         frame.getContentPane().add(lblAirplaneNumber);
 
         JLabel lblNumberOfAirportFromFile = new JLabel("Airport number to read from file (<100)");
@@ -395,7 +395,8 @@ public class AirportSim extends JFrame{
 
 
 
-        JButton btnNewButton = new JButton("Add Airplane");
+        JButton btnNewButton = new JButton("Add Airplane with initial event");
+        btnNewButton.setFont(new Font("Lucida Grande", Font.BOLD, 14));
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // add new airplane here -------------
@@ -437,17 +438,17 @@ public class AirportSim extends JFrame{
         });
         // set other GUI component parameters
         btnNewButton.setForeground(Color.ORANGE);
-        btnNewButton.setBounds(510, 260, 117, 44);
+        btnNewButton.setBounds(410, 260, 250, 44);
         frame.getContentPane().add(btnNewButton);
 
-        JLabel lblNewLabel = new JLabel("New Airport Information");
-        lblNewLabel.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
+        JLabel lblNewLabel = new JLabel("Too ADD New Airport");
+        lblNewLabel.setFont(new Font("Lucida Grande",Font.BOLD, 13));
         lblNewLabel.setBounds(20, 6, 208, 16);
         frame.getContentPane().add(lblNewLabel);
 
-        JLabel lblNewLabel_1 = new JLabel("New Airplane Information");
-        lblNewLabel_1.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
-        lblNewLabel_1.setBounds(20, 186, 170, 16);
+        JLabel lblNewLabel_1 = new JLabel("To ADD New Airplane with initial event");
+        lblNewLabel_1.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+        lblNewLabel_1.setBounds(20, 186, 270, 16);
         frame.getContentPane().add(lblNewLabel_1);
 
         JLabel lblAirplaneName = new JLabel("Type the name ");
@@ -498,7 +499,7 @@ public class AirportSim extends JFrame{
             }
         });
 
-        SelectAirport.setBounds(322, 257, 92, 27);
+        SelectAirport.setBounds(302, 257, 92, 27);
         frame.getContentPane().add(SelectAirport);
 
         SelectEvent.setBounds(430, 218, 160, 26);
