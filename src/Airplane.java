@@ -1,15 +1,9 @@
-//Peijun Wu
-
-//TODO add number of passengers, speed
-//Added in other places
 public class Airplane {
-    //Added two properties
     private String m_name;
     private int m_speed;
     private int m_numberPassengers;
-    // which runway is this airplane in
-    public int runway_number;
-    public int destination;
+    public int runway_number; // which runway is the airplane taking
+    public int destination;  //
 
     //Added parameters
     public Airplane(String name, int speed, int numberPassengers) {
@@ -17,6 +11,7 @@ public class Airplane {
         m_speed = speed;
         m_numberPassengers = numberPassengers;
     }
+
     //Implemented some getters.
     public String getName() {
         return m_name;

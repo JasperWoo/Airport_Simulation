@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class AirportSim {
-    public static final int NUM_AIRPORTS = 50;     // Our data has a total of 128 airports.
+    public static final int NUM_AIRPORTS = 50;
     public static Airport[] airportList = new Airport[NUM_AIRPORTS];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
 
@@ -19,6 +19,7 @@ public class AirportSim {
         String line = "";
         String csvSeparator = ",";
 
+        // Read airport information from .csv and initialize airports.
         try {
             br = new BufferedReader(new FileReader(csvAirports));
             line = br.readLine(); // Skip the first line
@@ -43,20 +44,22 @@ public class AirportSim {
             }
         }
 
+        // calculate the pairwise distances
         for (int i = 0; i < NUM_AIRPORTS; i++) {
             for (int j = i; j < NUM_AIRPORTS; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                 }
-                // calculate the pairwise distances
                 distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
                         Math.sin(Math.toRadians(airportList[j].getM_Lat())) +
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
             }
         }
+        // Set up simulation stop time.
         Simulator.stopAt(1000);
-        //In each loop, new planes will depart at every airport
+        
+        //In each loop, new planes will depart at every airport.
         for (int i = 0; i < numInitials; i++) {
             for(int j = 0; j<NUM_AIRPORTS; j++) {
                 Airplane boe747 = new Airplane("Boe747", 614, 416);
@@ -71,6 +74,8 @@ public class AirportSim {
                 }
             }
         }
+
+        // Start the simulation
         Simulator.run();
     }
 }
