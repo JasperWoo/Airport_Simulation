@@ -63,12 +63,12 @@ public class AirportSim {
         for (int i = 0; i < numInitials; i++) {
             for(int j = 0; j<NUM_AIRPORTS; j++) {
                 Airplane boe747 = new Airplane("Boe747", 614, 416);
-                AirportEvent departureEvent_1 = new AirportEvent(0, airportList[0], AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
+                AirportEvent departureEvent_1 = new AirportEvent(0, airportList[j], AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
                 Simulator.schedule(departureEvent_1);
 
                 if (airportList[j].isSupportA380()) {
                     Airplane a380 = new Airplane("A380", 634, 853);
-                    AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
+                    AirportEvent departureEvent_2 = new AirportEvent(0, airportList[j], AirportEvent.PLANE_DEPARTS, a380, 0, 0);
                     Simulator.schedule(departureEvent_2);
                     // The departure event, when handled, will automatically assign a new number of passengers randomly. Thus no need to assign randomly here.
                 }
