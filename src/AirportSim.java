@@ -57,6 +57,7 @@ public class AirportSim extends JFrame{
     private JTextField airplaneDelaytime;
     private String newAirplaneName;
     private int CurrentAirplaneNumber = 0;
+    public static int NumberOfAirportBeforReadingFiles = 0;
     // set airport list to store input airport
     public static Airport[] airportList;
     // initialize distance matrix between every ariport
@@ -230,15 +231,16 @@ public class AirportSim extends JFrame{
         lblNumberOfAirplaneFromFile.setBounds(690, 180, 330, 30);
         frame.getContentPane().add(lblNumberOfAirplaneFromFile);
 
+        //read n airports from data_airports.csv file
         JButton btnAdd50Airport = new JButton("Add Airports From File");
         btnAdd50Airport.setFont(new Font("Lucida Grande", Font.BOLD, 14));
         btnAdd50Airport.setForeground(Color.GREEN);
         btnAdd50Airport.setBackground(Color.GREEN);
-        // use anonymous representation
         btnAdd50Airport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // set the action function to connect certain action of user with other variable
                 int currentAirportNumber = airportArrayList.size();
+                NumberOfAirportBeforReadingFiles = currentAirportNumber;
                 int NUM_addAIRPORTS = Integer.parseInt(NumberOfAirportFromFile.getText());
                 String csvAirports = "data_airports.csv";
                 BufferedReader br = null;
@@ -255,7 +257,7 @@ public class AirportSim extends JFrame{
                         airportArrayList.add(new Airport(values[0], Double.valueOf(values[1]), Double.valueOf(values[2]),
                                 Double.valueOf(values[3]), Integer.valueOf(values[4]), Integer.valueOf(values[5]),
                                 Integer.valueOf(values[6]), Boolean.valueOf(values[7]), Double.valueOf(values[8]),
-                                Double.valueOf(values[9]))); //Los Angelas
+                                Double.valueOf(values[9])));
                     }
                 }  catch (FileNotFoundException eread){
                     eread.printStackTrace();
@@ -281,6 +283,7 @@ public class AirportSim extends JFrame{
 
         btnAdd50Airport.setBounds(690, 80, 200, 44);
         frame.getContentPane().add(btnAdd50Airport);
+
         //add airplane from file
         //this is for option reading airplanes from file
         //then this function will add certain number of airplanes on airports read from file
@@ -296,7 +299,7 @@ public class AirportSim extends JFrame{
                 for (int i = 0; i < numInitials; i++) {
                     for(int j = 0; j<Integer.parseInt(NumberOfAirportFromFile.getText()); j++) {
                         Airplane boe747 = new Airplane("Boe747", 614, 416);
-                        AirportEvent departureEvent_1 = new AirportEvent(0, airportArrayList.get(j),
+                        AirportEvent departureEvent_1 = new AirportEvent(0, airportArrayList.get(j+NumberOfAirportBeforReadingFiles),
                                 AirportEvent.PLANE_DEPARTS, boe747, 0, 0);
                         Simulator.schedule(departureEvent_1);
                         CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
@@ -304,7 +307,7 @@ public class AirportSim extends JFrame{
 
                         if (airportArrayList.get(j).isSupportA380()) {
                             Airplane a380 = new Airplane("A380", 634, 853);
-                            AirportEvent departureEvent_2 = new AirportEvent(0, airportArrayList.get(j),
+                            AirportEvent departureEvent_2 = new AirportEvent(0, airportArrayList.get(j+NumberOfAirportBeforReadingFiles),
                                     AirportEvent.PLANE_DEPARTS, a380, 0, 0);
                             Simulator.schedule(departureEvent_2);
                             CurrentAirplaneNumber = CurrentAirplaneNumber + 1;
@@ -318,7 +321,8 @@ public class AirportSim extends JFrame{
         });
         btnAdd50Airplane.setBounds(690, 240, 200, 44);
         frame.getContentPane().add(btnAdd50Airplane);
-        // set the botton with could let user to add airport to the system
+
+        // set the botton with could let user to add airport to the system one by one
         JButton btnAddAirport = new JButton("Add Airport");
         btnAddAirport.setFont(new Font("Lucida Grande", Font.BOLD, 14));
         btnAddAirport.setForeground(Color.GREEN);
@@ -485,13 +489,14 @@ public class AirportSim extends JFrame{
         lblInitialDepartingAirport.setBounds(185, 261, 154, 16);
         frame.getContentPane().add(lblInitialDepartingAirport);
 
+        //choose which airport as initial airport for the added airplane
         JComboBox SelectAirport = new JComboBox(SelectAirportModel);
         SelectAirport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 selectedAirport = airportArrayList.get(SelectAirport.getSelectedIndex());
             }
         });
-
+        //choose event type
         JComboBox SelectEvent = new JComboBox(EventListModel);
         SelectAirport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -519,14 +524,15 @@ public class AirportSim extends JFrame{
         lblNewLabel_3.setBounds(84, 380, 126, 16);
         frame.getContentPane().add(lblNewLabel_3);
 
+        // this is to run the simulation
         btnRun = new JButton("RUN");
         btnRun.setFont(new Font("Lucida Grande", Font.BOLD, 24));
         btnRun.setForeground(Color.RED);
         btnRun.setBackground(Color.RED);
-        // when clink "run" botton, run this function
+        // when clink "run" bottom, run this function
         btnRun.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // calculation the distence matrix according to the longitude and altitude
+                // calculation the distance matrix according to the longitude and altitude
                 distanceMatrix = new double[airportArrayList.size()][airportArrayList.size()];
                 for (int i = 0; i < airportArrayList.size(); i++) {
                     for (int j = i; j < airportArrayList.size(); j++) {
@@ -556,7 +562,7 @@ public class AirportSim extends JFrame{
             putValue(NAME, "SwingAction");
             putValue(SHORT_DESCRIPTION, "Some short description");
         }
-        // check if the airplane use added is A380
+        // determine if airport support A380 from the checkbox
         public void actionPerformed(ActionEvent e) {
             JCheckBox cbA380 = (JCheckBox) e.getSource();
             if (cbA380.isSelected()) {
@@ -573,7 +579,8 @@ public class AirportSim extends JFrame{
             putValue(NAME, "A380");
             putValue(SHORT_DESCRIPTION, "Some short description");
         }
-        // set the A380 state to true if the user select that parameter
+        // if the name is A380, check the A380 checkbox, and disable the function to type in the name
+        //if not A380, users can type the name
         public void actionPerformed(ActionEvent e) {
             JCheckBox cb_airplaneIf380 = (JCheckBox) e.getSource();
             if (cb_airplaneIf380.isSelected()) {
