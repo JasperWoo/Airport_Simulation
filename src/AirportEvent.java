@@ -8,7 +8,7 @@ public class AirportEvent extends Event {
 
     private Airplane m_plane;
     private int m_numPassengers;
-    private double m_lastEventTime;
+    private double m_lastEventTime;  //Use to calculate the circling time.
 
     AirportEvent(double delay, EventHandler handler, int eventType, Airplane plane, int numPassengers, double lastEventTime) {
         super(delay, handler, eventType);
