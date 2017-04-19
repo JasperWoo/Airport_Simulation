@@ -5,9 +5,7 @@ import java.text.NumberFormat;
 import java.util.TreeSet;
 import mpi.*;
 import mpjdev.natmpjdev.Intracomm;
-import test.AirportEvent;
-import test.Event;
-import test.MPIUtil;
+
 
 public class SimulatorEngine implements EventHandler {
 
@@ -76,15 +74,14 @@ public class SimulatorEngine implements EventHandler {
     			//reset alltoall buffers
     			allToAllInitialize();
     			double LBTS = m_eventList.first().getTime() + m_lookAhead;
-    			while(running[0] != 0 && m_eventList.first().getTime() <= LBTS){
-    				Event ev = m_eventList.pollFirst();
-    		        SimulatorEvent event = (SimulatorEvent)ev;
-    		        
+    			while(running[0] == 0 && m_eventList.first().getTime() <= LBTS){
+    				Event event = m_eventList.pollFirst();
+    				
     		        if (event.getType() == SimulatorEvent.STOP_EVENT) {
     		        		running[0] = 1;
     		        }
-    		        	
-    				ev.getHandler().handle(ev);
+    		        m_currentTime = event.getTime();
+    				event.getHandler().handle(event);
     			}
     			
     			//use AllReduce on running to determine if all LP has stopped running.
@@ -94,9 +91,9 @@ public class SimulatorEngine implements EventHandler {
     			
     			updateRecvBuf();
     			MPIUtil.allToAll(sendBuf, 0, sendCount, sendDispls, MPI.DOUBLE, 
-    					recvBuf, recvCount, recvDispls, MPI.DOUBLE);
+    					recvBuf, 0, recvCount, recvDispls, MPI.DOUBLE);
     			
-    			for (int i = 0; i < sizeOfRecvBuf; i += 4) {
+    			for (int i = 0; i < sizeOfRecvBuf; i += 5) {
     				double currentTime = Simulator.getCurrentTime();
     				double eventStart = recvBuf[i];
     				double eventDelay = recvBuf[i + 1];
@@ -113,20 +110,20 @@ public class SimulatorEngine implements EventHandler {
     					curAirplane = new Airplane("A380_1", 634, 853);
     				AirportEvent landingEvent = new AirportEvent(correctDelay,  AirportSim.airportList[destination],
                             AirportEvent.PLANE_ARRIVES, curAirplane, passengerNum, eventStart);
-    				schedule(landingEvent);
+    				Simulator.schedule(landingEvent);
     			}
     		}
     }
 
     public void updateSendBuf(double startTime, double delay, double airportId, 
 			double airplaneType, double passengerNum) {
-    		sendBuf[sizeOfRecvBuf] = startTime;
-    		sendBuf[sizeOfRecvBuf + 1] = delay;
-    		sendBuf[sizeOfRecvBuf + 2] = airportId;
-    		sendBuf[sizeOfRecvBuf + 3] = airplaneType;
-    		sendBuf[sizeOfRecvBuf + 4] = passengerNum;
-    		sizeOfRecvBuf += 4;
-    		sendCount[(int)airportId] += 4.0;
+    		sendBuf[sizeOfSendBuf] = startTime;
+    		sendBuf[sizeOfSendBuf + 1] = delay;
+    		sendBuf[sizeOfSendBuf + 2] = airportId;
+    		sendBuf[sizeOfSendBuf + 3] = airplaneType;
+    		sendBuf[sizeOfSendBuf + 4] = passengerNum;
+    		sizeOfSendBuf += 5;
+    		sendCount[(int)airportId] += 5;
     }
     
     public void updateRecvBuf() {
