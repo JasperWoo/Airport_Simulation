@@ -73,8 +73,12 @@ public class SimulatorEngine implements EventHandler {
     		while (!m_eventList.isEmpty()) {
     			//reset alltoall buffers
     			allToAllInitialize();
-    			double LBTS = m_eventList.first().getTime() + m_lookAhead;
-    			while(running[0] == 0 && m_eventList.first().getTime() <= LBTS){
+    			double[] LocalLBTS = new double[1];//Local LBTS
+    			LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
+    			double[] LBTS = new double[1];//global LBTS
+    			MPI.COMM_WORLD.Allreduce(LocalLBTS, 0, LBTS, 0, 1, MPI.DOUBLE, MPI.MIN);
+    			
+    			while(running[0] == 0 && m_eventList.first().getTime() <= LBTS[0]){
     				Event event = m_eventList.pollFirst();
     				
     		        if (event.getType() == SimulatorEvent.STOP_EVENT) {

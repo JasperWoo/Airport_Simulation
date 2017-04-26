@@ -6,7 +6,7 @@ public class AirportSim {
 	public static int airportTotalNum = 2;
     public static Airport[] airportList = new Airport[airportTotalNum];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
-    
+    static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
         int numInitials = 1;
@@ -14,6 +14,31 @@ public class AirportSim {
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
+        
+/*        //define new datatype for event send&recv
+        int typeAirEventStructblocklengths[] = new int[6];
+        int typeAirEventStructdisplacements[] = new int [6];
+        Datatype typeAirEventStructOldType[] = new Datatype[6];
+        typeAirEventStructOldType[0] = MPI.CHAR; //for airplane name
+        typeAirEventStructblocklengths[0] = 1;
+        typeAirEventStructdisplacements[0] = 0;
+        typeAirEventStructOldType[1] = MPI.INT; //for airplane speed
+        typeAirEventStructblocklengths[1] = 1;
+        typeAirEventStructdisplacements[1] = 1;
+        typeAirEventStructOldType[2] = MPI.INT; //for passenger number, not capacity
+        typeAirEventStructblocklengths[2] = 1;
+        typeAirEventStructdisplacements[2] = 2;
+        typeAirEventStructOldType[3] = MPI.INT; //for des airport Index
+        typeAirEventStructblocklengths[3] = 1;
+        typeAirEventStructdisplacements[3] = 3;
+        typeAirEventStructOldType[4] = MPI.DOUBLE; //for take off event current time
+        typeAirEventStructblocklengths[4] = 1;
+        typeAirEventStructdisplacements[4] = 4;
+        typeAirEventStructOldType[5] = MPI.DOUBLE; //for delay time
+        typeAirEventStructblocklengths[5] = 1;
+        typeAirEventStructdisplacements[5] = 5;
+        typeAirEvent =  Datatype.Struct(typeAirEventStructblocklengths, typeAirEventStructdisplacements, typeAirEventStructOldType);
+        typeAirEvent.Commit();*/
         
         
         airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, 0, -118.4, 33.9); //Los Angelas
