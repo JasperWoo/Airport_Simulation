@@ -12,7 +12,7 @@ public class SimulatorEngine implements EventHandler {
     private double m_currentTime;
     private TreeSet<Event> m_eventList;
     private boolean m_running;
-    private double m_lookAhead;
+    public double m_lookAhead;
     
     private double[] sendBuf;
     private int sizeOfSendBuf;
@@ -74,6 +74,7 @@ public class SimulatorEngine implements EventHandler {
     			//reset alltoall buffers
     			allToAllInitialize();
     			double[] LocalLBTS = new double[1];//Local LBTS
+    			
     			LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
     			double[] LBTS = new double[1];//global LBTS
     			MPI.COMM_WORLD.Allreduce(LocalLBTS, 0, LBTS, 0, 1, MPI.DOUBLE, MPI.MIN);
@@ -119,6 +120,27 @@ public class SimulatorEngine implements EventHandler {
     				Simulator.schedule(landingEvent);
     			}
     		}
+    }
+    
+    public double getLocalLBTS(){
+    	double LB = 0;
+    	for (Event c_Event : m_eventList){
+    		if (c_Event.getType() == SimulatorEvent.STOP_EVENT){
+    			LB = c_Event.getTime();  //get stopping time, this is the max time
+    		}
+    	}
+    	
+    	for (Event c_Event : m_eventList){
+    		AirportEvent airEvent = (AirportEvent)c_Event;
+    		if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
+    			double LBi = airEvent.getTime() + airEvent.getLastEventTime();
+    			if (LBi < LB){
+    				LB = LBi;
+    			}
+    		}
+    	}
+    	
+    	return LB;
     }
 
     public void updateSendBuf(double startTime, double delay, double airportId, 
