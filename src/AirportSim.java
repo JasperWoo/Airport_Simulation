@@ -6,7 +6,7 @@ public class AirportSim {
 	public static int airportTotalNum = 2;
     public static Airport[] airportList = new Airport[airportTotalNum];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
-    static Datatype typeAirEvent;
+    //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
         int numInitials = 1;
