@@ -29,11 +29,11 @@ public class AirportSim {
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
             }
         }
-        Simulator.stopAt(10);
+        Simulator.stopAt(50);
         //In each loop, new planes will depart at every airport
         for (int i = 0; i < numInitials; i++) {
-            Airplane boe747_1 = new Airplane("Boe747", 614, 416);
-            Airplane boe747_2 = new Airplane("Boe747", 614, 416);
+            Airplane boe747_1 = new Airplane("Boe707", 614, 416);
+            Airplane boe747_2 = new Airplane("Boe717", 614, 416);
             //Airplane boe747_3 = new Airplane("Boe747", 614, 416);
             //Airplane boe747_4 = new Airplane("Boe747", 614, 416);
             //Airplane a380 = new Airplane("A380_1", 634, 853);

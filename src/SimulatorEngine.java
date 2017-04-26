@@ -87,7 +87,9 @@ public class SimulatorEngine implements EventHandler {
     			//use AllReduce on running to determine if all LP has stopped running.
     			int[] all_running = new int[1];
     			MPI.COMM_WORLD.Allreduce(running, 0, all_running, 0, 1, MPI.INT, MPI.PROD);
-    			if (all_running[0] == 1) break;
+    			if (all_running[0] == 1){
+    				break;
+    			}
     			
     			updateRecvBuf();
     			MPIUtil.allToAll(sendBuf, 0, sendCount, sendDispls, MPI.DOUBLE, 

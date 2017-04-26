@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import mpi.MPI;
-import test.MPIUtil;
+//import test.MPIUtil;
 
 public class Airport implements EventHandler {
 
