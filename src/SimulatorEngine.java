@@ -128,7 +128,8 @@ public class SimulatorEngine implements EventHandler {
         
         if (blockedList.isEmpty()) {
         	Message m = incomingQueue.pollFirst();
-        	queueCount[(int) m.message[5]]--;
+        	int fromLPid = (int) m.message[5];
+        	queueCount[fromLPid]--;
         	double LBTS = 0.0;
         	//if not a null message, then schedule a new event, 
         	//otherwise execute all event before the time null message specifies.
