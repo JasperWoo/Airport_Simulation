@@ -35,7 +35,7 @@ public class Airport implements EventHandler {
 
     public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, 
     		double runwayTimeToTakeoff, int groundCapacity, int airCapacity, 
-    		int numRunways, boolean supportA380, int LPid, double Long, double Lat) {
+    		int numRunways, boolean supportA380, double Long, double Lat) {
         m_airportName = name;
         m_inTheAir =  0;
         m_onTheGround = 0;
@@ -53,7 +53,6 @@ public class Airport implements EventHandler {
         m_supportA380 = supportA380;
         m_Lat = Lat;
         m_Long = Long;
-        m_LPid = LPid;
         Arrays.fill(m_freeRunways, true);
     }
 
@@ -235,5 +234,9 @@ public class Airport implements EventHandler {
 
 	public int getM_LPid() {
 		return m_LPid;
+	}
+
+	public void setM_LPid(int m_LPid) {
+		this.m_LPid = m_LPid;
 	}
 }

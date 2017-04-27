@@ -22,6 +22,8 @@ public class SimulatorEngine implements EventHandler {
     private int size;
     private mpi.Request req[] = new mpi.Request[size];
     private double[][] recvBuf = new double[size][6];
+    private double[] lookaheadTable;
+    
     
     private TreeSet<Message> incomingQueue;
     private int[] queueCount;
