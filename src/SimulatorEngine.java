@@ -70,6 +70,9 @@ public class SimulatorEngine implements EventHandler {
      * YAWNS run function and other helper functions
      */
     void runYAWNS() {
+        	int rank = MPI.COMM_WORLD.Rank();
+        	int size = MPI.COMM_WORLD.Size();
+        	
     		m_running = true;
     		int[] running = new int[] {0};
     		while (!m_eventList.isEmpty()) {
@@ -80,7 +83,7 @@ public class SimulatorEngine implements EventHandler {
     			//LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
     			
     			MPI.COMM_WORLD.Allreduce(LocalLBTS, 0, LBTS, 0, 1, MPI.DOUBLE, MPI.MIN);
-    			System.out.println("LBTS = "+ LBTS[0]);
+    			if (rank == 0) {System.out.println("LBTS = "+ LBTS[0]);}
     			while(running[0] == 0 && m_eventList.first().getTime() <= LBTS[0]){
     				Event event = m_eventList.pollFirst();
     				
@@ -113,10 +116,10 @@ public class SimulatorEngine implements EventHandler {
     				int airplaneType = (int)recvBuf[i + 3];
     				int passengerNum = (int)recvBuf[i + 4];
     				Airplane curAirplane;
-    				if (airplaneType == 0) 
-    					curAirplane = new Airplane("Boe747", 614, 416);
+    				if (airplaneType == 9) 
+    					curAirplane = new Airplane(AirportSim.airplaneNameList[9], 707, 466);
     				else 
-    					curAirplane = new Airplane("A380_1", 634, 853);
+    					curAirplane = new Airplane(AirportSim.airplaneNameList[airplaneType], 614, 416);
     				AirportEvent landingEvent = new AirportEvent(correctDelay,  AirportSim.airportList[destination],
                             AirportEvent.PLANE_ARRIVES, curAirplane, passengerNum, eventStart);
     				Simulator.schedule(landingEvent);
@@ -202,7 +205,8 @@ public class SimulatorEngine implements EventHandler {
         switch(ev.getType()) {
             case SimulatorEvent.STOP_EVENT:
                 m_running = false;
-                System.out.println("Simulator stopping at time: " + ev.getTime());
+                int rank = MPI.COMM_WORLD.Rank();
+                System.out.println("Simulator at LP "+rank+" stopping at time: " + ev.getTime());
                 break;
             default:
                 System.out.println("Invalid event type");

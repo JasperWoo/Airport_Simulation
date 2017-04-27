@@ -3,20 +3,21 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
+//import java.util.concurrent.ThreadLocalRandom;
 
-import com.sun.prism.Material;
-
+//import jdk.internal.dynalink.beans.StaticClass;
 import mpi.*;
 
 public class AirportSim {
 	public static int airportTotalNum = 50;
     public static Airport[] airportList = new Airport[airportTotalNum];
+    public static String[] airplaneNameList = new String[10];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
     //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 1;
+        int numInitials = 4;
+        int stopTime = 10;
         
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
@@ -110,8 +111,52 @@ public class AirportSim {
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
             }
         }
-        Simulator.stopAt(50);
+        Simulator.stopAt(stopTime);
         //In each loop, new planes will depart at every airport
+        
+        //Initiate airplane with name Boe707, 717， 727， 737， 747， 757， 767， 777， 787，A380
+        airplaneNameList[0]="Boe707";
+        airplaneNameList[1]="Boe717";
+        airplaneNameList[2]="Boe727";
+        airplaneNameList[3]="Boe737";
+        airplaneNameList[4]="Boe747";
+        airplaneNameList[5]="Boe757";
+        airplaneNameList[6]="Boe767";
+        airplaneNameList[7]="Boe777";
+        airplaneNameList[8]="Boe787";
+        airplaneNameList[9]="A380";
+        int startAirportID;
+        int endAirportID;
+        if (rank < ceilLPnumber){
+        	startAirportID = rank*ceilAirportNumber;
+        	endAirportID = startAirportID + ceilAirportNumber;
+        }else{
+        	startAirportID = ceilLPnumber*ceilAirportNumber + (rank-ceilLPnumber)*floorAirportNumber;
+        	endAirportID = startAirportID + floorAirportNumber;
+        }
+    	for (int i = startAirportID; i< endAirportID; i++){
+    		if (airportList[i].m_supportA380 == true){
+    			Airplane newAirplane = new Airplane(airplaneNameList[9], 707, 466);
+    			AirportEvent departureEvent = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane, 0, 0);
+                Simulator.schedule(departureEvent);
+                if (numInitials > 1){
+                	for (int j = 1; j<numInitials;j++){
+                		Airplane newAirplane2 = new Airplane(airplaneNameList[Math.floorMod(j-1, 9)], 614, 416);
+            			AirportEvent departureEvent2 = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane2, 0, 0);
+                        Simulator.schedule(departureEvent2);
+                	}
+                }
+    		}else{
+                if (numInitials > 1){
+                	for (int j = 0; j<numInitials;j++){
+                		Airplane newAirplane2 = new Airplane(airplaneNameList[Math.floorMod(j, 9)], 614, 416);
+            			AirportEvent departureEvent2 = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane2, 0, 0);
+                        Simulator.schedule(departureEvent2);
+                	}
+                }
+    		}
+    	}
+/*        
         for (int i = 0; i < numInitials; i++) {
             Airplane boe747_1 = new Airplane("Boe707", 614, 416);
             Airplane boe747_2 = new Airplane("Boe717", 614, 416);
@@ -129,12 +174,12 @@ public class AirportSim {
             		Simulator.schedule(departureEvent_2);
             }
             
-        }
-        Simulator.setLookAhead(1.0);
+        }*/
+        //Simulator.setLookAhead(1.0);
         Simulator.runYAWNS();
         
         MPI.Finalize();
-        System.out.println("The end!");
+        System.out.println("The end! from LP "+ rank);
     }
 }
 
