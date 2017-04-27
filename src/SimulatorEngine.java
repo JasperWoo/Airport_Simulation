@@ -170,7 +170,8 @@ public class SimulatorEngine implements EventHandler {
     		sendBuf[sizeOfSendBuf + 3] = airplaneType;
     		sendBuf[sizeOfSendBuf + 4] = passengerNum;
     		sizeOfSendBuf += 5;
-    		sendCount[(int)airportId] += 5;
+    		//sendCount[(int)airportId] += 5;
+    		sendCount[AirportSim.airportList[(int)airportId].getM_LPid()] += 5;
     }
     
     public void updateRecvBuf() {

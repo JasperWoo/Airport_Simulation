@@ -36,7 +36,7 @@ public class Airport implements EventHandler {
 
     public Airport(String name, double runwayTimeToLand, double requiredTimeOnGround, 
     		double runwayTimeToTakeoff, int groundCapacity, int airCapacity, 
-    		int numRunways, boolean supportA380, int LPid, double Long, double Lat) {
+    		int numRunways, boolean supportA380, double Long, double Lat) {
         m_airportName = name;
         m_inTheAir =  0;
         m_onTheGround = 0;
@@ -54,7 +54,7 @@ public class Airport implements EventHandler {
         m_supportA380 = supportA380;
         m_Lat = Lat;
         m_Long = Long;
-        m_LPid = LPid;
+        //m_LPid = LPid;
         Arrays.fill(m_freeRunways, true);
     }
 
@@ -129,8 +129,12 @@ public class Airport implements EventHandler {
         switch(airEvent.getType()) {
             case AirportEvent.PLANE_ARRIVES:
                 m_inTheAir++;
-                System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight " + curAirplane.getName() + " arrived at airport " + AirportSim.airportList[curAirport].getName());
-                AirportEvent landedEvent = new AirportEvent(m_runwayTimeToLand, this, AirportEvent.PLANE_LANDED, curAirplane, airEvent.getNumPassengers(), airEvent.getTime());
+                System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight " 
+                + curAirplane.getName() + " arrived at airport " + 
+                		AirportSim.airportList[curAirport].getName());
+                AirportEvent landedEvent = new AirportEvent(m_runwayTimeToLand, this, 
+                		AirportEvent.PLANE_LANDED, curAirplane, airEvent.getNumPassengers(), 
+                		airEvent.getTime());
                 //Since this process takes up the runway, we need to check if the runway is empty.
                 checkRunways(curAirplane, landedEvent);
                 break;
