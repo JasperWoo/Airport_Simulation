@@ -210,10 +210,14 @@ public class Airport implements EventHandler {
                         Simulator.schedule(landingEvent);
                     }
                     else {
-                    		double startTime = Simulator.getCurrentTime();
-                    		double airplaneType = curAirplane.getName().equals("A380_1")? 1 : 0;
-                    		double passengerNum = airEvent.getNumPassengers();
-                    		Simulator.updateSendBuf(startTime, delay, (double)destination, airplaneType, passengerNum);
+                    		double[] message = new double[5];
+                    		message[0] = Simulator.getCurrentTime();
+                    		message[1] = delay;
+                    		message[2] = (double)destination;
+                    		message[3] = curAirplane.getName().equals("A380_1")? 1 : 0;
+                    		message[4] = airEvent.getNumPassengers();
+                    		
+                    		MPI.COMM_WORLD.Isend(message, 0, 5, MPI.DOUBLE, destId, 0);
                     }
                     continueRunway(airEvent);  
                     

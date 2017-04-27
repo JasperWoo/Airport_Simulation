@@ -50,7 +50,6 @@ public class AirportSim {
             
         }
         Simulator.setLookAhead(1.0);
-        Simulator.runYAWNS();
         
         MPI.Finalize();
         System.out.println("The end!");
