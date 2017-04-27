@@ -151,7 +151,7 @@ public class Airport implements EventHandler {
                 int newNumPassengers = ThreadLocalRandom.current().nextInt(curAirplane.getCapacity()/2, curAirplane.getCapacity() + 1);
                 m_numDeparted += newNumPassengers;
                 //Print out departing msg.
-                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight " + curAirplane.getName() + " is ready to depart " + " with " + newNumPassengers + " passengers.");
+                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight " + curAirplane.getName() + " is ready to depart from airport " + AirportSim.airportList[curAirport].getName() + " with " + newNumPassengers + " passengers.");
                 
                 //Choose a random remote airport, get corresponding distance and flight time. Pass it to the  AirportEvent.
                 int numAirports = AirportSim.airportList.length;
@@ -231,5 +231,10 @@ public class Airport implements EventHandler {
 
 	public int getM_LPid() {
 		return m_LPid;
+	}
+	
+	public void setM_LPid(int lp) {
+		m_LPid = lp;
+		
 	}
 }

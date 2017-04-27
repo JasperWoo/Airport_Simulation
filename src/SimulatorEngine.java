@@ -2,6 +2,7 @@
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.TreeSet;
 import mpi.*;
 import mpjdev.natmpjdev.Intracomm;
@@ -22,6 +23,7 @@ public class SimulatorEngine implements EventHandler {
     private int sizeOfRecvBuf;
     private int recvCount[];
     private int recvDispls[];
+    private double[] LBTS = new double[1];//global LBTS
 
 
 
@@ -74,11 +76,11 @@ public class SimulatorEngine implements EventHandler {
     			//reset alltoall buffers
     			allToAllInitialize();
     			double[] LocalLBTS = new double[1];//Local LBTS
+    			LocalLBTS[0] = getLocalLBTS();
+    			//LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
     			
-    			LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
-    			double[] LBTS = new double[1];//global LBTS
     			MPI.COMM_WORLD.Allreduce(LocalLBTS, 0, LBTS, 0, 1, MPI.DOUBLE, MPI.MIN);
-    			
+    			System.out.println("LBTS = "+ LBTS[0]);
     			while(running[0] == 0 && m_eventList.first().getTime() <= LBTS[0]){
     				Event event = m_eventList.pollFirst();
     				
@@ -131,11 +133,28 @@ public class SimulatorEngine implements EventHandler {
     	}
     	
     	for (Event c_Event : m_eventList){
-    		AirportEvent airEvent = (AirportEvent)c_Event;
-    		if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
-    			double LBi = airEvent.getTime() + airEvent.getLastEventTime();
-    			if (LBi < LB){
-    				LB = LBi;
+    		if (!(c_Event.getType() == SimulatorEvent.STOP_EVENT)){
+    			AirportEvent airEvent = (AirportEvent)c_Event;
+    			if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
+    				double LBi = airEvent.getTime() ; //+ airEvent.getLastEventTime();
+	    			if (LBi < LB){
+	    				LB = LBi;
+	    			}
+    			}else{
+    				//calculate lookahead time
+    				int speed = airEvent.getPlane().getSpeed();
+    				int curAirport = Arrays.asList(AirportSim.airportList).indexOf(airEvent.getHandler());
+    				for (int i = 0; i < AirportSim.airportTotalNum; i += 1 ){
+    					if (!(i==curAirport)){
+    						double dist = AirportSim.distanceMatrix[curAirport][i];
+    	                    double m_flightTime = dist / speed;
+    	                    //double LBi = airEvent.getTime() + airEvent.getLastEventTime()+m_flightTime;
+    	                    double LBi = airEvent.getTime() + m_flightTime;
+    		    			if (LBi < LB){
+    		    				LB = LBi;
+    		    			}
+    					}
+    				}
     			}
     		}
     	}

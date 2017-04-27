@@ -1,5 +1,8 @@
 //Peijun Wu
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.sun.prism.Material;
+
 import mpi.*;
 
 public class AirportSim {
@@ -43,6 +46,13 @@ public class AirportSim {
         
         airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, 0, -118.4, 33.9); //Los Angelas
         airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, 1, -97.6, 30.1); //Austin
+        
+        //distribute airport total n, total LP is p
+        for (int i = 0; i < airportTotalNum; i++){
+        	airportList[i].setM_LPid((int)(Math.floor((i+1)/size)));
+        }
+        
+        
         for (int i = 0; i < airportList.length; i++) {
             for (int j = i; j < airportList.length; j++) {
                 if (i == j) {
