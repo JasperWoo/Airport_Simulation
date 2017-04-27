@@ -2,7 +2,11 @@
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.TreeSet;
+
 import mpi.*;
 import mpjdev.natmpjdev.Intracomm;
 
@@ -24,12 +28,35 @@ public class SimulatorEngine implements EventHandler {
     private int recvDispls[];
 
 
+    private TreeSet<Message> incomingQueue;
+    private int[] queueCount;
+    
+	class Message implements Comparable<Message>{
+		double[] message;
+		public Message(double[] message) {
+			this.message = message.clone();
+		}
+		
+		@Override
+		public int compareTo(Message m) {
+			return Double.compare(message[0] + message[1], m.message[0] + m.message[1]);
+		}
+	}
 
     SimulatorEngine() {
         m_running = false;
         m_currentTime = 0.0;
         m_eventList = new TreeSet<Event>();
     }
+    
+    public void nullMessageInitialize() {
+        int rank = MPI.COMM_WORLD.Rank();
+        int size = MPI.COMM_WORLD.Size();
+        queueCount = new int[size];
+        queueCount[rank] = 1;
+    }
+    
+
     
     public void allToAllInitialize() {
 		int size = MPI.COMM_WORLD.Size();
@@ -114,6 +141,99 @@ public class SimulatorEngine implements EventHandler {
     			}
     		}
     }
+    
+    void runNull() {
+    	
+    }
+    
+    void nullLoop() {
+        int rank = MPI.COMM_WORLD.Rank();
+        int size = MPI.COMM_WORLD.Size();
+        
+    	m_running = true;
+        while(m_running && !m_eventList.isEmpty()) {
+            Event ev = m_eventList.pollFirst();
+            m_currentTime = ev.getTime();
+            ev.getHandler().handle(ev);
+        }
+        
+        mpi.Request req[] = new mpi.Request[size];
+        double[][] recvBuf = new double[size][6];
+        for (int i = 0; i < size; i++) {
+        	if (i == rank) continue;
+        	
+        	//if the last receive has finished, the event should be scheduled now
+        	if (req[i].Test() != null) {
+        		//put event in the incomingQueue and update incomingQueue and corresponding count
+        		Message m = new Message(recvBuf[i]);
+        		incomingQueue.add(m);
+        		queueCount[i]++;
+        	}
+        	
+        	//if incoming queue for this LP is empty and non-blocking receive hasn't finished receiving, this means it 
+        	//should be changed to blocking receive in the below blocking loop
+        	else if (queueCount[i] == 0) {
+        		req[i].Cancel();	
+        		continue;
+        	}
+        	
+        	req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
+        }
+        
+        //check if it's blocked 
+        List<Integer> blockedList = new LinkedList<>();
+        for (int i = 0; i < size; i++) {
+        	if (queueCount[i] == 0)
+        		blockedList.add(i);
+        }
+        
+        if (blockedList.isEmpty()) {
+        	Message m = incomingQueue.pollFirst();
+        	queueCount[(int) m.message[5]]--;
+        	Event nextIncomingEvent = createEvent(m.message);
+        	schedule(nextIncomingEvent);
+        	
+        	double LBTS = nextIncomingEvent.getTime();
+    		while(m_running && m_eventList.first().getTime() <= LBTS){
+    			Event event = m_eventList.pollFirst();
+    	        m_currentTime = event.getTime();
+    			event.getHandler().handle(event);
+    		}
+        } else {
+        	for (int i = 0; i < size; i++) {
+        		if (i == rank) continue;
+        		
+        		//send null message here
+        		MPI.COMM_WORLD.Isend(arg0, arg1, arg2, arg3, arg4, arg5);
+        	}
+        	for (int i : blockedList) {
+        		MPI.COMM_WORLD.Recv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
+        		//put event in the incomingQueue and update incomingQueue and corresponding count
+        		
+        	}
+        }   
+        
+        
+    }
+    
+    Event createEvent(double[] recv) {
+		double currentTime = Simulator.getCurrentTime();
+		double eventStart = recv[0];
+		double eventDelay = recv[1];
+		double correctDelay = eventStart + eventDelay - currentTime;
+		int destination = (int)recv[2];
+		int airplaneType = (int)recv[3];
+		int passengerNum = (int)recv[4];
+		Airplane curAirplane;
+		if (airplaneType == 0) 
+			curAirplane = new Airplane("Boe747", 614, 416);
+		else 
+			curAirplane = new Airplane("A380_1", 634, 853);
+		AirportEvent landingEvent = new AirportEvent(correctDelay,  AirportSim.airportList[destination],
+                AirportEvent.PLANE_ARRIVES, curAirplane, passengerNum, eventStart);
+		return landingEvent;
+    }
+
 
     public void updateSendBuf(double startTime, double delay, double airportId, 
 			double airplaneType, double passengerNum) {
