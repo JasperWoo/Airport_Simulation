@@ -18,6 +18,7 @@ public class SimulatorEngine implements EventHandler {
     private boolean m_running;
     private double m_lookAhead;
     
+    /*
     private double[] sendBuf;
     private int sizeOfSendBuf;
     private int sendCount[];
@@ -26,8 +27,13 @@ public class SimulatorEngine implements EventHandler {
     private int sizeOfRecvBuf;
     private int recvCount[];
     private int recvDispls[];
+    */
 
-
+    private int rank;
+    private int size;
+    private mpi.Request req[] = new mpi.Request[size];
+    private double[][] recvBuf = new double[size][6];
+    
     private TreeSet<Message> incomingQueue;
     private int[] queueCount;
     
@@ -50,25 +56,13 @@ public class SimulatorEngine implements EventHandler {
     }
     
     public void nullMessageInitialize() {
-        int rank = MPI.COMM_WORLD.Rank();
-        int size = MPI.COMM_WORLD.Size();
+        rank = MPI.COMM_WORLD.Rank();
+        size = MPI.COMM_WORLD.Size();
         queueCount = new int[size];
         queueCount[rank] = 1;
-    }
-    
-
-    
-    public void allToAllInitialize() {
-		int size = MPI.COMM_WORLD.Size();
-		sendBuf = new double[500];
-		sizeOfSendBuf = 0;
-		sendCount = new int[size];
-		sendDispls = new int[size];
-		recvBuf = new double[500];
-		sizeOfRecvBuf = 0;
-		recvCount = new int[size];
-		recvDispls = new int[size];
-	}
+        req = new mpi.Request[size];
+        recvBuf = new double[size][6];
+    }    
 
     public static void printResult(int airportNum){
         NumberFormat formatter = new DecimalFormat("#0.00");
@@ -143,22 +137,21 @@ public class SimulatorEngine implements EventHandler {
     }
     
     void runNull() {
-    	
+    	while (m_running) {
+    		nullLoop();
+    	}
     }
     
     void nullLoop() {
-        int rank = MPI.COMM_WORLD.Rank();
-        int size = MPI.COMM_WORLD.Size();
-        
     	m_running = true;
         while(m_running && !m_eventList.isEmpty()) {
             Event ev = m_eventList.pollFirst();
             m_currentTime = ev.getTime();
             ev.getHandler().handle(ev);
         }
+
+        if (!m_running) return;
         
-        mpi.Request req[] = new mpi.Request[size];
-        double[][] recvBuf = new double[size][6];
         for (int i = 0; i < size; i++) {
         	if (i == rank) continue;
         	
@@ -169,14 +162,17 @@ public class SimulatorEngine implements EventHandler {
         		incomingQueue.add(m);
         		queueCount[i]++;
         	}
-        	
-        	//if incoming queue for this LP is empty and non-blocking receive hasn't finished receiving, this means it 
-        	//should be changed to blocking receive in the below blocking loop
-        	else if (queueCount[i] == 0) {
-        		req[i].Cancel();	
+        	else {
+            	//if incoming queue for this LP is empty and non-blocking receive hasn't finished receiving, this means it 
+            	//should be changed to blocking receive in the below blocking loop
+        		//
+        		//otherwise it can keep waiting the same non-blocking receive
+        		if (queueCount[i] == 0) 
+            		req[i].Cancel();
         		continue;
-        	}
+        	}	
         	
+        	//safe to start another non-blocking receive
         	req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         }
         
@@ -190,6 +186,8 @@ public class SimulatorEngine implements EventHandler {
         if (blockedList.isEmpty()) {
         	Message m = incomingQueue.pollFirst();
         	queueCount[(int) m.message[5]]--;
+        	
+        	if ()
         	Event nextIncomingEvent = createEvent(m.message);
         	schedule(nextIncomingEvent);
         	
@@ -204,16 +202,22 @@ public class SimulatorEngine implements EventHandler {
         		if (i == rank) continue;
         		
         		//send null message here
-        		MPI.COMM_WORLD.Isend(arg0, arg1, arg2, arg3, arg4, arg5);
+        		double[] sendNull = new double[6];
+        		sendNull[0] = getCurrentTime();
+        		
+        		sendNull[1] = LBTS;					//lookahead
+        		sendNull[2] = -1;					//use destination field to specify if it is a null message
+        		sendNull[6] = ;
+        		MPI.COMM_WORLD.Isend(sendNull, 0, 6, MPI.DOUBLE, i, 0);
         	}
         	for (int i : blockedList) {
         		MPI.COMM_WORLD.Recv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         		//put event in the incomingQueue and update incomingQueue and corresponding count
-        		
+        		Message m = new Message(recvBuf[i]);
+        		incomingQueue.add(m);
+        		queueCount[i]++;
         	}
         }   
-        
-        
     }
     
     Event createEvent(double[] recv) {
