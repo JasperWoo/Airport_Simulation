@@ -75,6 +75,7 @@ public class SimulatorEngine implements EventHandler {
     	while (m_running) {
     		nullLoop();
     	}
+    	sendNullMessage(-2);
     }
     
     public void nullMessageInitialize() {
@@ -123,8 +124,9 @@ public class SimulatorEngine implements EventHandler {
         
         if (blockedList.isEmpty()) {
         	double LBTS = getCurrentTime();
-        	while (true) {
-            	Message m = incomingQueue.pollFirst();
+        	Message m = null;
+        	while (!incomingQueue.isEmpty()) {
+            	m = incomingQueue.pollFirst();
             	int fromLPid = (int) m.message[5];
             	queueCount[fromLPid]--;
             	
@@ -135,7 +137,7 @@ public class SimulatorEngine implements EventHandler {
     	        	Simulator.schedule(nextIncomingEvent);
     	        	LBTS = nextIncomingEvent.getTime();
     	        	break;
-            	} else {
+            	} else if (m.message[2] == -1){
             		LBTS = m.message[0] + m.message[1];
             		
             		//check if the null message is out-dated
@@ -155,7 +157,14 @@ public class SimulatorEngine implements EventHandler {
             		} 
             		else break;
             	}
+            	else {
+            		queueCount[fromLPid]++;
+            	}
         	}
+        	
+        	//all the other processors have finished
+        	if (incomingQueue.isEmpty() && m.message[2] == -2)
+        		LBTS = Double.MAX_VALUE;
         	 
     		while(m_running && m_eventList.first().getTime() <= LBTS){
     			Event event = m_eventList.pollFirst();
@@ -165,7 +174,7 @@ public class SimulatorEngine implements EventHandler {
     		
     		m_currentTime = LBTS;
         } else {
-        	sendNullMessage();
+        	sendNullMessage(-1);
         	for (int i : blockedList) {
         		if (req[i] == null){
         			req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
@@ -199,7 +208,7 @@ public class SimulatorEngine implements EventHandler {
 		return landingEvent;
     }
     
-    public void sendNullMessage() {
+    public void sendNullMessage(int type) {
     	for (int i = 0; i < size; i++) {
     		if (i == rank) continue;
     		
@@ -208,7 +217,7 @@ public class SimulatorEngine implements EventHandler {
     		sendNull[0] = getCurrentTime();
     		
     		sendNull[1] = lookaheadTable[i];					//lookahead
-    		sendNull[2] = -1;					//use destination field to specify if it is a null message
+    		sendNull[2] = type;					//use destination field to specify if it is a null message
     		sendNull[5] = rank;
     		MPI.COMM_WORLD.Isend(sendNull, 0, 6, MPI.DOUBLE, i, 0);
     	}

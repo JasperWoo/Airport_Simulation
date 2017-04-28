@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.sun.prism.Material;
@@ -134,6 +135,8 @@ public class AirportSim {
         }
         
         Simulator.stopAt(50);
+        
+        
         //In each loop, new planes will depart at every airport
         for (int i = 0; i < numInitials; i++) {
             Airplane boe747_1 = new Airplane("Boe707", 614, 416);
@@ -151,7 +154,6 @@ public class AirportSim {
             		AirportEvent departureEvent_2 = new AirportEvent(0, airportList[1], AirportEvent.PLANE_DEPARTS, boe747_2, 0, 0);
             		Simulator.schedule(departureEvent_2);
             }
-            
         }
         
         Simulator.runNull();
