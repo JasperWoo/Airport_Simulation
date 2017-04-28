@@ -22,6 +22,8 @@ public class SimulatorEngine implements EventHandler {
     private int size;
     private mpi.Request req[] = new mpi.Request[size];
     private double[][] recvBuf = new double[size][6];
+    private double[] fastestSpeed;
+    private double[] shortestDistance;
     private double[] lookaheadTable;
     
     
@@ -73,6 +75,7 @@ public class SimulatorEngine implements EventHandler {
      */
     public void runNull() {
     	nullMessageInitialize();
+    	m_running = true;
     	while (m_running) {
     		nullLoop();
     	}
@@ -83,39 +86,37 @@ public class SimulatorEngine implements EventHandler {
         size = MPI.COMM_WORLD.Size();
         queueCount = new int[size];
         queueCount[rank] = 1;
-        req = new mpi.Request[size];
         recvBuf = new double[size][6];
+        req = new mpi.Request[size];
+        incomingQueue = new TreeSet<>();
     }    
     
     public void nullLoop() {
-    	m_running = true;
+    	/*
         while(m_running && !m_eventList.isEmpty()) {
             Event ev = m_eventList.pollFirst();
             m_currentTime = ev.getTime();
             ev.getHandler().handle(ev);
         }
 
-        if (!m_running) return;
+        if (!m_running) return;*/
         
         for (int i = 0; i < size; i++) {
         	if (i == rank) continue;
         	
+        	if (req[i] == null) continue;
         	//if the last receive has finished, the event should be scheduled now
-        	if (req[i].Test() != null) {
+        	
+        	if (!req[i].Is_null()) {
+        		req[i].Test();
+        		//the receive request hasn't finished
+        		if (!req[i].Is_null()) continue;
+        		
         		//put event in the incomingQueue and update incomingQueue and corresponding count
         		Message m = new Message(recvBuf[i]);
         		incomingQueue.add(m);
         		queueCount[i]++;
         	}
-        	else {
-            	//if incoming queue for this LP is empty and non-blocking receive hasn't finished receiving, this means it 
-            	//should be changed to blocking receive in the below blocking loop
-        		//
-        		//otherwise it can keep waiting the same non-blocking receive
-        		if (queueCount[i] == 0) 
-            		req[i].Cancel();
-        		continue;
-        	}	
         	
         	//safe to start another non-blocking receive
         	req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
@@ -156,12 +157,16 @@ public class SimulatorEngine implements EventHandler {
         		double[] sendNull = new double[6];
         		sendNull[0] = getCurrentTime();
         		
-        		sendNull[1] = LBTS;					//lookahead
+        		sendNull[1] = lookaheadTable[i];					//lookahead
         		sendNull[2] = -1;					//use destination field to specify if it is a null message
+        		sendNull[5] = rank;
         		MPI.COMM_WORLD.Isend(sendNull, 0, 6, MPI.DOUBLE, i, 0);
         	}
         	for (int i : blockedList) {
-        		MPI.COMM_WORLD.Recv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
+        		if (req[i] == null){
+        			req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
+        		}
+        		req[i].Wait();
         		//put event in the incomingQueue and update incomingQueue and corresponding count
         		Message m = new Message(recvBuf[i]);
         		incomingQueue.add(m);
@@ -216,5 +221,35 @@ public class SimulatorEngine implements EventHandler {
     
 	public void setLookAhead(double lookAhead) {
 		m_lookAhead = lookAhead;
+	}
+
+
+	public double[] getFastestSpeed() {
+		return fastestSpeed;
+	}
+
+
+	public void setFastestSpeed(double[] fastestSpeed) {
+		this.fastestSpeed = fastestSpeed;
+	}
+
+
+	public double[] getShortestDistance() {
+		return shortestDistance;
+	}
+
+
+	public void setShortestDistance(double[] shortestDistance) {
+		this.shortestDistance = shortestDistance;
+	}
+
+
+	public double[] getLookaheadTable() {
+		return lookaheadTable;
+	}
+
+
+	public void setLookaheadTable(double[] lookaheadTable) {
+		this.lookaheadTable = lookaheadTable;
 	}
 }

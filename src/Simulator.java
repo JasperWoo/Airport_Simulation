@@ -23,6 +23,10 @@ public class Simulator {
         getSim().run();
     }
 
+    public static void runNull() {
+    	getSim().runNull();
+    }
+    
     public static double getCurrentTime() {
         return getSim().getCurrentTime();
     }

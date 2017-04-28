@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.sun.prism.Material;
@@ -10,13 +11,10 @@ import com.sun.prism.Material;
 import mpi.*;
 
 public class AirportSim {
-	public static int airportTotalNum = 50;
+	public static int airportTotalNum = 2;
     public static Airport[] airportList = new Airport[airportTotalNum];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
     
-    public double[] fastestSpeed;
-    public double[] shortestDistance;
-    public double[] lookaheadTable;
     //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
@@ -25,6 +23,16 @@ public class AirportSim {
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
+        
+        Simulator.getSim().setFastestSpeed(new double[size]);
+        Simulator.getSim().setShortestDistance(new double[size]);
+        Simulator.getSim().setLookaheadTable(new double[size]);
+        
+        double fastestSpeed = 634;
+        double[] shortestDistance = Simulator.getSim().getShortestDistance();
+        double[] lookaheadTable = Simulator.getSim().getLookaheadTable();
+        
+        Arrays.fill(shortestDistance, Double.MAX_VALUE);
         
 /*        //define new datatype for event send&recv
         int typeAirEventStructblocklengths[] = new int[6];
@@ -51,6 +59,7 @@ public class AirportSim {
         typeAirEvent =  Datatype.Struct(typeAirEventStructblocklengths, typeAirEventStructdisplacements, typeAirEventStructOldType);
         typeAirEvent.Commit();*/
         
+        /*
         String csvAirports = "data_airports.csv";
         BufferedReader br = null;
         String line = "";
@@ -83,9 +92,9 @@ public class AirportSim {
                 }
             }
         }
-        
-        //airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, 0, -118.4, 33.9); //Los Angelas
-        //airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, 1, -97.6, 30.1); //Austin
+        */
+        airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
+        airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
         
         //distribute airport total n, total LP is p
         int currentNtoSetLP = 0;
@@ -107,13 +116,23 @@ public class AirportSim {
             for (int j = i; j < airportList.length; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
+                    continue;
                 }
-                distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
+                int LPid = airportList[i].getM_LPid();
+                double distance = distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
                         Math.sin(Math.toRadians(airportList[j].getM_Lat())) +
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
+                if (distance < shortestDistance[i]) 
+                	shortestDistance[i] = distance;
             }
         }
+        
+        for (int i = 0; i < size; i++) {
+        	if (i == rank) continue;
+        	lookaheadTable[i] = shortestDistance[i] / fastestSpeed;
+        }
+        
         Simulator.stopAt(50);
         //In each loop, new planes will depart at every airport
         for (int i = 0; i < numInitials; i++) {
@@ -134,7 +153,8 @@ public class AirportSim {
             }
             
         }
-        Simulator.setLookAhead(1.0);
+        
+        Simulator.runNull();
         
         MPI.Finalize();
         System.out.println("The end!");
