@@ -143,7 +143,7 @@ public class SimulatorEngine implements EventHandler {
             	//otherwise execute all event before the time null message specifies.
             	if (m.message[2] >= 0) {
     	        	Event nextIncomingEvent = createEvent(m.message);
-    	        	schedule(nextIncomingEvent);
+    	        	Simulator.schedule(nextIncomingEvent);
     	        	LBTS = nextIncomingEvent.getTime();
     	        	break;
             	} else {
