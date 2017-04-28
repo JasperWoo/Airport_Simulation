@@ -4,11 +4,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 import mpi.*;
-import mpjdev.natmpjdev.Intracomm;
 
 
 public class SimulatorEngine implements EventHandler {
@@ -16,7 +14,6 @@ public class SimulatorEngine implements EventHandler {
     private double m_currentTime;
     private TreeSet<Event> m_eventList;
     private boolean m_running;
-    private double m_lookAhead;
     
     private int rank;
     private int size;
@@ -55,7 +52,6 @@ public class SimulatorEngine implements EventHandler {
         double circlingTimeInMins = curAirport.getCirclingTime() * 60;
         System.out.println("The total number of passengers arrived and departed, and circling time(mins) at "+ curAirport.getName() + ": " );
         System.out.println(curAirport.getNumArrived() + "," + curAirport.getNumDeparted() + "," + formatter.format(circlingTimeInMins));
-
     }
 
     void run() {
@@ -96,21 +92,13 @@ public class SimulatorEngine implements EventHandler {
     }    
     
     public void nullLoop() {
-    	/*
-        while(m_running && !m_eventList.isEmpty()) {
-            Event ev = m_eventList.pollFirst();
-            m_currentTime = ev.getTime();
-            ev.getHandler().handle(ev);
-        }
-
-        if (!m_running) return;*/
-        
         for (int i = 0; i < size; i++) {
         	if (i == rank) continue;
         	
+        	//if req[i] hasn't been initialize
         	if (req[i] == null) continue;
-        	//if the last receive has finished, the event should be scheduled now
         	
+        	//check if the receive has finished yet
         	if (!req[i].Is_null()) {
         		req[i].Test();
         		//the receive request hasn't finished
@@ -122,7 +110,7 @@ public class SimulatorEngine implements EventHandler {
         		queueCount[i]++;
         	}
         	
-        	//safe to start another non-blocking receive8
+        	//safe to start another non-blocking receive
         	req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         }
         
@@ -139,8 +127,9 @@ public class SimulatorEngine implements EventHandler {
             	Message m = incomingQueue.pollFirst();
             	int fromLPid = (int) m.message[5];
             	queueCount[fromLPid]--;
+            	
             	//if not a null message, then schedule a new event, 
-            	//otherwise execute all event before the time null message specifies.
+            	//otherwise execute all event before the time of the null message.
             	if (m.message[2] >= 0) {
     	        	Event nextIncomingEvent = createEvent(m.message);
     	        	Simulator.schedule(nextIncomingEvent);
@@ -148,9 +137,19 @@ public class SimulatorEngine implements EventHandler {
     	        	break;
             	} else {
             		LBTS = m.message[0] + m.message[1];
+            		
+            		//check if the null message is out-dated
             		if (LBTS <= getCurrentTime()) {
+            			LBTS = getCurrentTime();
+            			//if the null message is out-dated and the queue is empty now
             			if (queueCount[fromLPid] == 0) {
-            				LBTS = getCurrentTime();
+            				/*
+            				sendNullMessage();
+            				req[fromLPid].Wait();
+                    		Message newMessage = new Message(recvBuf[fromLPid]);
+                    		incomingQueue.add(newMessage);
+                    		queueCount[fromLPid]++;
+                    		*/
             				break;
             			}
             		} 
@@ -163,28 +162,16 @@ public class SimulatorEngine implements EventHandler {
     	        m_currentTime = event.getTime();
     			event.getHandler().handle(event);
     		}
+    		
     		m_currentTime = LBTS;
         } else {
-        	for (int i = 0; i < size; i++) {
-        		if (i == rank) continue;
-        		
-        		//send null message here
-        		double[] sendNull = new double[6];
-        		sendNull[0] = getCurrentTime();
-        		
-        		sendNull[1] = lookaheadTable[i];					//lookahead
-        		sendNull[2] = -1;					//use destination field to specify if it is a null message
-        		sendNull[5] = rank;
-        		MPI.COMM_WORLD.Isend(sendNull, 0, 6, MPI.DOUBLE, i, 0);
-        	}
+        	sendNullMessage();
         	for (int i : blockedList) {
         		if (req[i] == null){
         			req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         		}
-        		//req[i].Wait();
-	        	mpi.Status status = req[i].Wait();
-	        	
-        		//System.out.println("Count is: " + status.Get_count(MPI.DOUBLE));
+        		
+        		req[i].Wait();
 	        	
         		//put event in the incomingQueue and update incomingQueue and corresponding count
         		Message m = new Message(recvBuf[i]);
@@ -210,6 +197,21 @@ public class SimulatorEngine implements EventHandler {
 		AirportEvent landingEvent = new AirportEvent(correctDelay,  AirportSim.airportList[destination],
                 AirportEvent.PLANE_ARRIVES, curAirplane, passengerNum, eventStart);
 		return landingEvent;
+    }
+    
+    public void sendNullMessage() {
+    	for (int i = 0; i < size; i++) {
+    		if (i == rank) continue;
+    		
+    		//send null message here
+    		double[] sendNull = new double[6];
+    		sendNull[0] = getCurrentTime();
+    		
+    		sendNull[1] = lookaheadTable[i];					//lookahead
+    		sendNull[2] = -1;					//use destination field to specify if it is a null message
+    		sendNull[5] = rank;
+    		MPI.COMM_WORLD.Isend(sendNull, 0, 6, MPI.DOUBLE, i, 0);
+    	}
     }
 
     
@@ -237,11 +239,7 @@ public class SimulatorEngine implements EventHandler {
     public double getCurrentTime() {
         return m_currentTime;
     }
-    
-	public void setLookAhead(double lookAhead) {
-		m_lookAhead = lookAhead;
-	}
-
+ 
 
 	public double[] getFastestSpeed() {
 		return fastestSpeed;

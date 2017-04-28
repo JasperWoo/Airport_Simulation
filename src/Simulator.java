@@ -35,9 +35,5 @@ public class Simulator {
         event.setTime(event.getTime() + getSim().getCurrentTime());
         getSim().schedule(event);
     }
-    
-	public static void setLookAhead(double time) {
-		getSim().setLookAhead(time);
-	}
 	
 }
