@@ -89,6 +89,10 @@ public class SimulatorEngine implements EventHandler {
         recvBuf = new double[size][6];
         req = new mpi.Request[size];
         incomingQueue = new TreeSet<>();
+        
+        for (int i = 0; i < size; i++) {
+        	lookaheadTable[i] = 0.05;
+        }
     }    
     
     public void nullLoop() {
@@ -118,7 +122,7 @@ public class SimulatorEngine implements EventHandler {
         		queueCount[i]++;
         	}
         	
-        	//safe to start another non-blocking receive
+        	//safe to start another non-blocking receive8
         	req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         }
         
@@ -130,18 +134,28 @@ public class SimulatorEngine implements EventHandler {
         }
         
         if (blockedList.isEmpty()) {
-        	Message m = incomingQueue.pollFirst();
-        	int fromLPid = (int) m.message[5];
-        	queueCount[fromLPid]--;
-        	double LBTS = 0.0;
-        	//if not a null message, then schedule a new event, 
-        	//otherwise execute all event before the time null message specifies.
-        	if (m.message[2] >= 0) {
-	        	Event nextIncomingEvent = createEvent(m.message);
-	        	schedule(nextIncomingEvent);
-	        	LBTS = nextIncomingEvent.getTime();
-        	} else {
-        		LBTS = m.message[0] + m.message[1];
+        	double LBTS = getCurrentTime();
+        	while (true) {
+            	Message m = incomingQueue.pollFirst();
+            	int fromLPid = (int) m.message[5];
+            	queueCount[fromLPid]--;
+            	//if not a null message, then schedule a new event, 
+            	//otherwise execute all event before the time null message specifies.
+            	if (m.message[2] >= 0) {
+    	        	Event nextIncomingEvent = createEvent(m.message);
+    	        	schedule(nextIncomingEvent);
+    	        	LBTS = nextIncomingEvent.getTime();
+    	        	break;
+            	} else {
+            		LBTS = m.message[0] + m.message[1];
+            		if (LBTS <= getCurrentTime()) {
+            			if (queueCount[fromLPid] == 0) {
+            				LBTS = getCurrentTime();
+            				break;
+            			}
+            		} 
+            		else break;
+            	}
         	}
         	 
     		while(m_running && m_eventList.first().getTime() <= LBTS){
@@ -149,6 +163,7 @@ public class SimulatorEngine implements EventHandler {
     	        m_currentTime = event.getTime();
     			event.getHandler().handle(event);
     		}
+    		m_currentTime = LBTS;
         } else {
         	for (int i = 0; i < size; i++) {
         		if (i == rank) continue;
@@ -166,7 +181,11 @@ public class SimulatorEngine implements EventHandler {
         		if (req[i] == null){
         			req[i] = MPI.COMM_WORLD.Irecv(recvBuf[i], 0, 6, MPI.DOUBLE, i, 0);
         		}
-        		req[i].Wait();
+        		//req[i].Wait();
+	        	mpi.Status status = req[i].Wait();
+	        	
+        		//System.out.println("Count is: " + status.Get_count(MPI.DOUBLE));
+	        	
         		//put event in the incomingQueue and update incomingQueue and corresponding count
         		Message m = new Message(recvBuf[i]);
         		incomingQueue.add(m);
