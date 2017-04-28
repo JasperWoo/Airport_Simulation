@@ -113,7 +113,7 @@ public class AirportSim {
         
         
         for (int i = 0; i < airportList.length; i++) {
-            for (int j = i; j < airportList.length; j++) {
+            for (int j = 0; j < airportList.length; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
                     continue;
@@ -123,7 +123,7 @@ public class AirportSim {
                         Math.sin(Math.toRadians(airportList[j].getM_Lat())) +
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
-                if (distance < shortestDistance[i]) 
+                if (distance < shortestDistance[LPid]) 
                 	shortestDistance[i] = distance;
             }
         }
