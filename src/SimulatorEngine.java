@@ -138,13 +138,7 @@ public class SimulatorEngine implements EventHandler {
     	for (Event c_Event : m_eventList){
     		if (!(c_Event.getType() == SimulatorEvent.STOP_EVENT)){
     			AirportEvent airEvent = (AirportEvent)c_Event;
-/*    			if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
-    				double LBi = airEvent.getTime() ; //+ airEvent.getLastEventTime();
-	    			if (LBi < LB){
-	    				LB = LBi;
-	    			}
-    			}else{*/
-    				//calculate LB time
+
     				int speed = airEvent.getPlane().getSpeed();
     				int curAirport = Arrays.asList(AirportSim.airportList).indexOf(airEvent.getHandler());
     				for (int i = 0; i < AirportSim.airportTotalNum; i += 1 ){
@@ -191,7 +185,6 @@ public class SimulatorEngine implements EventHandler {
     		    			}
     					}
     				}
-    			//}
     		}
     	}
     	
