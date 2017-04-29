@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 //Peijun Wu
 
 //TODO add number of passengers, speed
@@ -23,6 +25,10 @@ public class Airplane {
     public int getSpeed(){ return m_speed;}
     public int getCapacity(){ return m_numberPassengers; }
 
+    public int getAirplaneNameID(){
+    	int curAirportID = Arrays.asList(AirportSim.airplaneNameList).indexOf(m_name);
+    	return curAirportID;
+    }
 
 
 }

@@ -27,7 +27,7 @@ public class Airport implements EventHandler {
     private Queue<Event> m_runwayQueue;
     private int m_airCapacity;
     private int m_groundCapacity;
-    private boolean m_supportA380 = false;
+    public boolean m_supportA380 = false;
     private double m_Lat;
     private double m_Long;
     private int m_LPid;
@@ -213,7 +213,7 @@ public class Airport implements EventHandler {
                     		message[0] = Simulator.getCurrentTime();
                     		message[1] = delay;
                     		message[2] = (double)destination;
-                    		message[3] = curAirplane.getName().equals("A380_1")? 1 : 0;
+                    		message[3] = curAirplane.getAirplaneNameID();
                     		message[4] = airEvent.getNumPassengers();
                     		message[5] = startId;
                     		

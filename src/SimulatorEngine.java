@@ -86,10 +86,6 @@ public class SimulatorEngine implements EventHandler {
         recvBuf = new double[size][6];
         req = new mpi.Request[size];
         incomingQueue = new TreeSet<>();
-        
-        for (int i = 0; i < size; i++) {
-        	lookaheadTable[i] = 0.05;
-        }
     }    
     
     public void nullLoop() {
@@ -199,10 +195,10 @@ public class SimulatorEngine implements EventHandler {
 		int airplaneType = (int)recv[3];
 		int passengerNum = (int)recv[4];
 		Airplane curAirplane;
-		if (airplaneType == 0) 
-			curAirplane = new Airplane("Boe747", 614, 416);
+		if (airplaneType == 9) 
+			curAirplane = new Airplane(AirportSim.airplaneNameList[9], 707, 466);
 		else 
-			curAirplane = new Airplane("A380_1", 634, 853);
+			curAirplane = new Airplane(AirportSim.airplaneNameList[airplaneType], 614, 416);
 		AirportEvent landingEvent = new AirportEvent(correctDelay,  AirportSim.airportList[destination],
                 AirportEvent.PLANE_ARRIVES, curAirplane, passengerNum, eventStart);
 		return landingEvent;

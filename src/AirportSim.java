@@ -12,14 +12,16 @@ import com.sun.prism.Material;
 import mpi.*;
 
 public class AirportSim {
-	public static int airportTotalNum = 2;
+	public static int airportTotalNum = 100;
     public static Airport[] airportList = new Airport[airportTotalNum];
+    public static String[] airplaneNameList = new String[10];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
     
     //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 1;
+        int numInitials = 40;
+        int stopTime = 5;
         
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
@@ -29,7 +31,7 @@ public class AirportSim {
         Simulator.getSim().setShortestDistance(new double[size]);
         Simulator.getSim().setLookaheadTable(new double[size]);
         
-        double fastestSpeed = 634;
+        double fastestSpeed = 707;
         double[] shortestDistance = Simulator.getSim().getShortestDistance();
         double[] lookaheadTable = Simulator.getSim().getLookaheadTable();
         
@@ -60,7 +62,7 @@ public class AirportSim {
         typeAirEvent =  Datatype.Struct(typeAirEventStructblocklengths, typeAirEventStructdisplacements, typeAirEventStructOldType);
         typeAirEvent.Commit();*/
         
-        /*
+        
         String csvAirports = "data_airports.csv";
         BufferedReader br = null;
         String line = "";
@@ -75,9 +77,9 @@ public class AirportSim {
                 // use comma as separator
                 String [] values = line.split(csvSeparator)  ;
                 airportList[i] = new Airport(values[0], Double.valueOf(values[1]), 
-                		Double.valueOf(values[2]), Double.valueOf(values[3]), Integer.valueOf(values[4]), 
-                		Integer.valueOf(values[5]), Integer.valueOf(values[6]), Boolean.valueOf(values[7]), 
-                		Double.valueOf(values[8]), Double.valueOf(values[9])); //Los Angelas
+                        Double.valueOf(values[2]), Double.valueOf(values[3]), Integer.valueOf(values[4]), 
+                        Integer.valueOf(values[5]), Integer.valueOf(values[6]), Boolean.valueOf(values[7]), 
+                        Double.valueOf(values[8]), Double.valueOf(values[9])); //Los Angelas
             }
         }  catch (FileNotFoundException e){
             e.printStackTrace();
@@ -93,9 +95,9 @@ public class AirportSim {
                 }
             }
         }
-        */
-        airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
-        airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
+        
+        //airportList[0] = new Airport("LAX", 0.1, 0.1, 0.1, 20, 10, 5, true, -118.4, 33.9); //Los Angelas
+        //airportList[1] = new Airport("AUS", 0.1, 0.1, 0.1, 20, 10, 5, true, -97.6, 30.1); //Austin
         
         //distribute airport total n, total LP is p
         int currentNtoSetLP = 0;
@@ -125,7 +127,7 @@ public class AirportSim {
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
                 if (distance < shortestDistance[LPid]) 
-                	shortestDistance[i] = distance;
+                	shortestDistance[LPid] = distance;
             }
         }
         
@@ -134,8 +136,52 @@ public class AirportSim {
         	lookaheadTable[i] = shortestDistance[i] / fastestSpeed;
         }
         
-        Simulator.stopAt(50);
+        Simulator.stopAt(stopTime);
         
+        //Initiate airplane with name Boe707, 717， 727， 737， 747， 757， 767， 777， 787，A380
+        airplaneNameList[0]="Boe707";
+        airplaneNameList[1]="Boe717";
+        airplaneNameList[2]="Boe727";
+        airplaneNameList[3]="Boe737";
+        airplaneNameList[4]="Boe747";
+        airplaneNameList[5]="Boe757";
+        airplaneNameList[6]="Boe767";
+        airplaneNameList[7]="Boe777";
+        airplaneNameList[8]="Boe787";
+        airplaneNameList[9]="A380";
+        int startAirportID;
+        int endAirportID;
+        if (rank < ceilLPnumber){
+            startAirportID = rank*ceilAirportNumber;
+            endAirportID = startAirportID + ceilAirportNumber;
+        }else{
+            startAirportID = ceilLPnumber*ceilAirportNumber + (rank-ceilLPnumber)*floorAirportNumber;
+            endAirportID = startAirportID + floorAirportNumber;
+        }
+        for (int i = startAirportID; i< endAirportID; i++){
+            if (airportList[i].m_supportA380 == true){
+                Airplane newAirplane = new Airplane(airplaneNameList[9], 707, 466);
+                AirportEvent departureEvent = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane, 0, 0);
+                Simulator.schedule(departureEvent);
+                if (numInitials > 1){
+                    for (int j = 1; j<numInitials;j++){
+                        Airplane newAirplane2 = new Airplane(airplaneNameList[Math.floorMod(j-1, 9)], 614, 416);
+                        AirportEvent departureEvent2 = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane2, 0, 0);
+                        Simulator.schedule(departureEvent2);
+                    }
+                }
+            }else{
+                if (numInitials > 1){
+                    for (int j = 0; j<numInitials;j++){
+                        Airplane newAirplane2 = new Airplane(airplaneNameList[Math.floorMod(j, 9)], 614, 416);
+                        AirportEvent departureEvent2 = new AirportEvent(0, airportList[i], AirportEvent.PLANE_DEPARTS, newAirplane2, 0, 0);
+                        Simulator.schedule(departureEvent2);
+                    }
+                }
+            }
+        }
+
+        /*
         
         //In each loop, new planes will depart at every airport
         for (int i = 0; i < numInitials; i++) {
@@ -155,6 +201,7 @@ public class AirportSim {
             		Simulator.schedule(departureEvent_2);
             }
         }
+        */
         
         Simulator.runNull();
         
