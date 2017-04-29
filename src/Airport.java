@@ -17,10 +17,10 @@ public class Airport implements EventHandler {
 
     private int m_numRunways;
     private boolean m_freeRunways[];
-    private double m_runwayTimeToLand;
-    private double m_runwayTimeToTakeoff;
-    private double m_requiredTimeOnGround;
-    private double m_checkDestinationPeriod = 0.05;
+    public double m_runwayTimeToLand;
+    public double m_runwayTimeToTakeoff;
+    public double m_requiredTimeOnGround;
+    public double m_checkDestinationPeriod = 0.05;
     private double m_circlingTime;
     private String m_airportName;
     private int m_numArrived;
@@ -129,7 +129,7 @@ public class Airport implements EventHandler {
         switch(airEvent.getType()) {
             case AirportEvent.PLANE_ARRIVES:
                 m_inTheAir++;
-                System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight " 
+                System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): Airplane " 
                 + curAirplane.getName() + " arrived at airport " + 
                 		AirportSim.airportList[curAirport].getName());
                 AirportEvent landedEvent = new AirportEvent(m_runwayTimeToLand, this, 
@@ -142,7 +142,7 @@ public class Airport implements EventHandler {
             case AirportEvent.PLANE_LANDED:
                 m_inTheAir--;
                 m_onTheGround++;
-                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight " + curAirplane.getName() + " lands at airport " + AirportSim.airportList[curAirport].getName() + " with " + airEvent.getNumPassengers() + " passengers.");
+                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): Airplane " + curAirplane.getName() + " lands at airport " + AirportSim.airportList[curAirport].getName() + " with " + airEvent.getNumPassengers() + " passengers.");
                 m_numArrived += airEvent.getNumPassengers();
                 //This process does not take up the runway, no need to check.
                 AirportEvent departureEvent = new AirportEvent( m_requiredTimeOnGround, this, AirportEvent.PLANE_DEPARTS, curAirplane, airEvent.getNumPassengers(), airEvent.getTime());
@@ -155,7 +155,7 @@ public class Airport implements EventHandler {
                 int newNumPassengers = ThreadLocalRandom.current().nextInt(curAirplane.getCapacity()/2, curAirplane.getCapacity() + 1);
                 m_numDeparted += newNumPassengers;
                 //Print out departing msg.
-                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): flight " + curAirplane.getName() + " is ready to depart from airport " + AirportSim.airportList[curAirport].getName() + " with " + newNumPassengers + " passengers.");
+                System.out.println(formatter.format(Simulator.getCurrentTime())+ "(hours): Airplane " + curAirplane.getName() + " is ready to depart from airport " + AirportSim.airportList[curAirport].getName() + " with " + newNumPassengers + " passengers.");
                 
                 //Choose a random remote airport, get corresponding distance and flight time. Pass it to the  AirportEvent.
                 int numAirports = AirportSim.airportList.length;
@@ -200,7 +200,7 @@ public class Airport implements EventHandler {
                     //This process does not take up the runway, no need to check.
                     AirportEvent landingEvent = new AirportEvent(delay,  AirportSim.airportList[destination],
                             AirportEvent.PLANE_ARRIVES, curAirplane, airEvent.getNumPassengers(), airEvent.getTime()); //The number of passengers is just the newNumPassengers
-                    System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): flight " + curAirplane.getName() + " takes off at airport " +
+                    System.out.println(formatter.format(Simulator.getCurrentTime()) + "(hours): Airplane " + curAirplane.getName() + " takes off at airport " +
                             m_airportName + " and flies to " + AirportSim.airportList[destination].getName() + ".");
                     
                     int destId = AirportSim.airportList[destination].getM_LPid();

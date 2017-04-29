@@ -5,7 +5,6 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.TreeSet;
 import mpi.*;
-import mpjdev.natmpjdev.Intracomm;
 
 
 public class SimulatorEngine implements EventHandler {
@@ -14,7 +13,7 @@ public class SimulatorEngine implements EventHandler {
     private TreeSet<Event> m_eventList;
     private boolean m_running;
     public double m_lookAhead;
-    
+    private int bufLength = 20000;
     private double[] sendBuf;
     private int sizeOfSendBuf;
     private int sendCount[];
@@ -35,11 +34,11 @@ public class SimulatorEngine implements EventHandler {
     
     public void allToAllInitialize() {
 		int size = MPI.COMM_WORLD.Size();
-		sendBuf = new double[500];
+		sendBuf = new double[bufLength];
 		sizeOfSendBuf = 0;
 		sendCount = new int[size];
 		sendDispls = new int[size];
-		recvBuf = new double[500];
+		recvBuf = new double[bufLength];
 		sizeOfRecvBuf = 0;
 		recvCount = new int[size];
 		recvDispls = new int[size];
@@ -101,6 +100,7 @@ public class SimulatorEngine implements EventHandler {
     				break;
     			}
     			
+    			organizeSendBuf();
     			updateRecvBuf();
     			MPIUtil.allToAll(sendBuf, 0, sendCount, sendDispls, MPI.DOUBLE, 
     					recvBuf, 0, recvCount, recvDispls, MPI.DOUBLE);
@@ -138,27 +138,60 @@ public class SimulatorEngine implements EventHandler {
     	for (Event c_Event : m_eventList){
     		if (!(c_Event.getType() == SimulatorEvent.STOP_EVENT)){
     			AirportEvent airEvent = (AirportEvent)c_Event;
-    			if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
+/*    			if (airEvent.getType() == AirportEvent.PLANE_TAKEOFF){
     				double LBi = airEvent.getTime() ; //+ airEvent.getLastEventTime();
 	    			if (LBi < LB){
 	    				LB = LBi;
 	    			}
-    			}else{
-    				//calculate lookahead time
+    			}else{*/
+    				//calculate LB time
     				int speed = airEvent.getPlane().getSpeed();
     				int curAirport = Arrays.asList(AirportSim.airportList).indexOf(airEvent.getHandler());
     				for (int i = 0; i < AirportSim.airportTotalNum; i += 1 ){
     					if (!(i==curAirport)){
     						double dist = AirportSim.distanceMatrix[curAirport][i];
     	                    double m_flightTime = dist / speed;
-    	                    //double LBi = airEvent.getTime() + airEvent.getLastEventTime()+m_flightTime;
-    	                    double LBi = airEvent.getTime() + m_flightTime;
+    	                    double extraDelay = 0;
+    	                    switch(airEvent.getType()) {
+    	                    	case AirportEvent.PLANE_ARRIVES:
+    	                    		extraDelay = AirportSim.airportList[curAirport].m_runwayTimeToLand+
+    	                    			AirportSim.airportList[curAirport].m_requiredTimeOnGround+
+    	                    			AirportSim.airportList[curAirport].m_runwayTimeToTakeoff+
+	                    				AirportSim.airportList[curAirport].m_checkDestinationPeriod;
+    	                    		break;
+    	                    	case AirportEvent.PLANE_DEPARTS:
+    	                    		extraDelay = AirportSim.airportList[curAirport].m_runwayTimeToTakeoff+
+    	                    			AirportSim.airportList[curAirport].m_checkDestinationPeriod;
+    	                    		break;
+    	                    	case AirportEvent.PLANE_LANDED:
+    	                    		extraDelay = AirportSim.airportList[curAirport].m_requiredTimeOnGround+
+        	                    		AirportSim.airportList[curAirport].m_runwayTimeToTakeoff+
+	                    				AirportSim.airportList[curAirport].m_checkDestinationPeriod;
+    	                    		break;
+    	                    	case AirportEvent.PLANE_TAKEOFF:
+    	                    		//takeoff event has determined destination
+    	                    		//the LB is calculated for next possible takeoff
+    	                    		int destination = airEvent.getPlane().destination;                    		
+    	                            double distance = AirportSim.distanceMatrix[curAirport][destination];
+    	                            double takeoffeventflightTime = distance / speed;
+    	                            
+    	                    		extraDelay = AirportSim.airportList[curAirport].m_runwayTimeToTakeoff+
+    	                    			takeoffeventflightTime+
+    	                    			AirportSim.airportList[curAirport].m_runwayTimeToLand+
+	                    				AirportSim.airportList[curAirport].m_requiredTimeOnGround+
+	                    				AirportSim.airportList[curAirport].m_runwayTimeToTakeoff+
+	                    				AirportSim.airportList[curAirport].m_checkDestinationPeriod;
+    	                    		break;
+    	                    		
+    	                    
+    	                    }
+    	                    double LBi = airEvent.getTime() + m_flightTime + extraDelay;
     		    			if (LBi < LB){
     		    				LB = LBi;
     		    			}
     					}
     				}
-    			}
+    			//}
     		}
     	}
     	
@@ -175,6 +208,38 @@ public class SimulatorEngine implements EventHandler {
     		sizeOfSendBuf += 5;
     		//sendCount[(int)airportId] += 5;
     		sendCount[AirportSim.airportList[(int)airportId].getM_LPid()] += 5;
+    }
+    
+    public void organizeSendBuf(){
+    	//this method organize the send buffer in the order of LP
+    	//each event has 5 double value, event number to LP is stored in sendCount[]
+        int size = MPI.COMM_WORLD.Size();
+    	double[][] tmpsendBuf = new double[size][bufLength];
+    	int[] tmpSendCount = new int[size];
+    	for (int i = 0; i < size; i ++){
+    		tmpSendCount[i] = 0;
+    	}
+    	for (int i = 0; i < sizeOfSendBuf; i +=5){
+    		int airportID = (int)sendBuf[i+2];
+    		int curLPforCurEvent =AirportSim.airportList[airportID].getM_LPid();
+    		tmpsendBuf[curLPforCurEvent][tmpSendCount[curLPforCurEvent]  ] = sendBuf[i  ];
+    		tmpsendBuf[curLPforCurEvent][tmpSendCount[curLPforCurEvent]+1] = sendBuf[i+1];
+    		tmpsendBuf[curLPforCurEvent][tmpSendCount[curLPforCurEvent]+2] = sendBuf[i+2];
+    		tmpsendBuf[curLPforCurEvent][tmpSendCount[curLPforCurEvent]+3] = sendBuf[i+3];
+    		tmpsendBuf[curLPforCurEvent][tmpSendCount[curLPforCurEvent]+4] = sendBuf[i+4];
+    		tmpSendCount[curLPforCurEvent] += 5;
+    	}
+    	int curDisp = 0;
+    	for (int i = 0; i < size; i ++){
+    		for (int j = 0; j<sendCount[i]; j +=5){
+    			sendBuf[curDisp] = tmpsendBuf[i][j];
+    			sendBuf[curDisp + 1] = tmpsendBuf[i][j + 1];
+    			sendBuf[curDisp + 2] = tmpsendBuf[i][j + 2];
+    			sendBuf[curDisp + 3] = tmpsendBuf[i][j + 3];
+    			sendBuf[curDisp + 4] = tmpsendBuf[i][j + 4];
+    			curDisp += 5;
+    		}
+    	}
     }
     
     public void updateRecvBuf() {
@@ -198,6 +263,7 @@ public class SimulatorEngine implements EventHandler {
     			sizeOfRecvBuf += recvCount[i];
     		}
     }
+    
     
     public void handle(Event event) {
         SimulatorEvent ev = (SimulatorEvent)event;

@@ -9,15 +9,15 @@ import java.io.IOException;
 import mpi.*;
 
 public class AirportSim {
-	public static int airportTotalNum = 50;
+	public static int airportTotalNum = 100;
     public static Airport[] airportList = new Airport[airportTotalNum];
     public static String[] airplaneNameList = new String[10];
     public static final double[][] distanceMatrix = new double[airportList.length][airportList.length];
     //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 4;
-        int stopTime = 10;
+        int numInitials = 10;
+        int stopTime = 20;
         
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
