@@ -1,5 +1,6 @@
 //Peijun Wu
 
+import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -72,10 +73,15 @@ public class SimulatorEngine implements EventHandler {
     public void runNull() {
     	nullMessageInitialize();
     	m_running = true;
+    	double startTime = System.nanoTime();
     	while (m_running) {
     		nullLoop();
     	}
     	sendNullMessage(-2);
+    	double endTime = System.nanoTime();
+    	//elapsed time in seconds
+    	double elapsedTime = (endTime - startTime) / 1000000000.0;
+    	System.out.println("Elapsed Time for the " + rank + "th LP: " + elapsedTime);
     }
     
     public void nullMessageInitialize() {
