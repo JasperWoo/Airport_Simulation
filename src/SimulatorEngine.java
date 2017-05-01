@@ -74,6 +74,7 @@ public class SimulatorEngine implements EventHandler {
         	
     		m_running = true;
     		int[] running = new int[] {0};
+            double startTime = System.nanoTime();
     		while (!m_eventList.isEmpty()) {
     			//reset alltoall buffers
     			allToAllInitialize();
@@ -125,6 +126,14 @@ public class SimulatorEngine implements EventHandler {
     				Simulator.schedule(landingEvent);
     			}
     		}
+
+            //only the 0 LP print the elapsed time
+            if (rank == 0) {
+                double endTime = System.nanoTime();
+                //elapsed time in seconds
+                double elapsedTime = (endTime - startTime) / 1000000000.0;
+                System.out.println("Elapsed Time for the " + rank + "th LP: " + elapsedTime);
+            }
     }
     
     public double getLocalLBTS(){
