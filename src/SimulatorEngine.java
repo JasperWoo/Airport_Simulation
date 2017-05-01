@@ -79,8 +79,11 @@ public class SimulatorEngine implements EventHandler {
     }
     
     public void nullMessageInitialize() {
+    	//get current LP's ID
         rank = MPI.COMM_WORLD.Rank();
+        //get total number of LP
         size = MPI.COMM_WORLD.Size();
+        
         queueCount = new int[size];
         queueCount[rank] = 1;
         recvBuf = new double[size][6];
@@ -118,6 +121,7 @@ public class SimulatorEngine implements EventHandler {
         		blockedList.add(i);
         }
         
+        //if it's not blocked
         if (blockedList.isEmpty()) {
         	double LBTS = getCurrentTime();
         	Message m = null;
@@ -141,13 +145,6 @@ public class SimulatorEngine implements EventHandler {
             			LBTS = getCurrentTime();
             			//if the null message is out-dated and the queue is empty now
             			if (queueCount[fromLPid] == 0) {
-            				/*
-            				sendNullMessage();
-            				req[fromLPid].Wait();
-                    		Message newMessage = new Message(recvBuf[fromLPid]);
-                    		incomingQueue.add(newMessage);
-                    		queueCount[fromLPid]++;
-                    		*/
             				break;
             			}
             		} 
@@ -158,7 +155,7 @@ public class SimulatorEngine implements EventHandler {
             	}
         	}
         	
-        	//all the other processors have finished
+        	//all the other processors have finished, set LBTS to infinity
         	if (incomingQueue.isEmpty() && m.message[2] == -2)
         		LBTS = Double.MAX_VALUE;
         	 
@@ -169,7 +166,9 @@ public class SimulatorEngine implements EventHandler {
     		}
     		
     		m_currentTime = LBTS;
-        } else {
+        } 
+        //if it's blocked, send null message and wait.
+        else {
         	sendNullMessage(-1);
         	for (int i : blockedList) {
         		if (req[i] == null){
