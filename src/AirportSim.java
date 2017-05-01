@@ -21,7 +21,7 @@ public class AirportSim {
         int size = MPI.COMM_WORLD.Size();
         
         
-        String csvAirports = "data_airports.csv";
+        String csvAirports = "../data_airports.csv";
         BufferedReader br = null;
         String line = "";
         String csvSeparator = ",";
