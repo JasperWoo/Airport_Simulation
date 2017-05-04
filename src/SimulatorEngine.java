@@ -162,7 +162,7 @@ public class SimulatorEngine implements EventHandler {
         	}
         	
         	//all the other processors have finished, set LBTS to infinity
-        	if (incomingQueue.isEmpty() && m.message[2] == -2)
+        	if (incomingQueue.isEmpty() && (size == 1 || m.message[2] == -2))
         		LBTS = Double.MAX_VALUE;
         	 
     		while(m_running && m_eventList.first().getTime() <= LBTS){
