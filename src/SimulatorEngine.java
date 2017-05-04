@@ -23,6 +23,11 @@ public class SimulatorEngine implements EventHandler {
     private int recvCount[];
     private int recvDispls[];
     private double[] LBTS = new double[1];//global LBTS
+    private double[] fastestSpeed;
+    private double[] shortestDistance;
+    private double[] lookaheadTable;
+    private double minLocalLB;
+
 
 
 
@@ -71,7 +76,7 @@ public class SimulatorEngine implements EventHandler {
     void runYAWNS() {
         	int rank = MPI.COMM_WORLD.Rank();
         	int size = MPI.COMM_WORLD.Size();
-        	
+        	minLocalLB = getMinLBTSforCurrentLP();
     		m_running = true;
     		int[] running = new int[] {0};
             double startTime = System.nanoTime();
@@ -79,7 +84,7 @@ public class SimulatorEngine implements EventHandler {
     			//reset alltoall buffers
     			allToAllInitialize();
     			double[] LocalLBTS = new double[1];//Local LBTS
-    			LocalLBTS[0] = getLocalLBTS();
+    			LocalLBTS[0] = Simulator.getCurrentTime()+minLocalLB;
     			//LocalLBTS[0] = m_eventList.first().getTime() + m_lookAhead;
     			
     			MPI.COMM_WORLD.Allreduce(LocalLBTS, 0, LBTS, 0, 1, MPI.DOUBLE, MPI.MIN);
@@ -134,6 +139,18 @@ public class SimulatorEngine implements EventHandler {
                 double elapsedTime = (endTime - startTime) / 1000000000.0;
                 System.out.println("Elapsed Time for the " + rank + "th LP: " + elapsedTime);
             }
+    }
+    
+    public double getMinLBTSforCurrentLP(){
+    	double minLB;
+    	//int rank = MPI.COMM_WORLD.Rank();
+        int size = MPI.COMM_WORLD.Size();
+        minLB=lookaheadTable[0];
+        for (int i=1; i<size; i++){
+        	if(lookaheadTable[i]<minLB) minLB = lookaheadTable[i];
+        }
+        
+    	return minLB;
     }
     
     public double getLocalLBTS(){
@@ -296,4 +313,34 @@ public class SimulatorEngine implements EventHandler {
 	public void setLookAhead(double lookAhead) {
 		m_lookAhead = lookAhead;
 	}
+	
+	public double[] getFastestSpeed() {
+		return fastestSpeed;
+	}
+
+
+	public void setFastestSpeed(double[] fastestSpeed) {
+		this.fastestSpeed = fastestSpeed;
+	}
+
+
+	public double[] getShortestDistance() {
+		return shortestDistance;
+	}
+
+
+	public void setShortestDistance(double[] shortestDistance) {
+		this.shortestDistance = shortestDistance;
+	}
+
+
+	public double[] getLookaheadTable() {
+		return lookaheadTable;
+	}
+
+
+	public void setLookaheadTable(double[] lookaheadTable) {
+		this.lookaheadTable = lookaheadTable;
+	}
+
 }

@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 
 import mpi.*;
 
@@ -20,6 +21,16 @@ public class AirportSim {
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
         
+        Simulator.getSim().setFastestSpeed(new double[size]);
+        Simulator.getSim().setShortestDistance(new double[size]);
+        Simulator.getSim().setLookaheadTable(new double[size]);
+        
+        double fastestSpeed = 707;
+        double[] shortestDistance = Simulator.getSim().getShortestDistance();
+        double[] lookaheadTable = Simulator.getSim().getLookaheadTable();
+        Arrays.fill(shortestDistance, Double.MAX_VALUE);
+
+
         
         String csvAirports = "../data_airports.csv";
         BufferedReader br = null;
@@ -67,19 +78,32 @@ public class AirportSim {
         	airportList[i].setM_LPid((int)Math.floor((i-ceilAirportNumber*ceilLPnumber)/floorAirportNumber)+ceilLPnumber);
         }
         
-        
-        
         for (int i = 0; i < airportList.length; i++) {
-            for (int j = i; j < airportList.length; j++) {
+            for (int j = 0; j < airportList.length; j++) {
                 if (i == j) {
                     distanceMatrix[i][j] = 0;
+                    continue;
                 }
-                distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
+                int LPid = airportList[i].getM_LPid();
+                double distance = distanceMatrix[i][j] = distanceMatrix[j][i] = 3959.0 * Math.acos(Math.sin(Math.toRadians(airportList[i].getM_Lat())) *
                         Math.sin(Math.toRadians(airportList[j].getM_Lat())) +
                         Math.cos(Math.toRadians(airportList[i].getM_Lat())) * Math.cos(Math.toRadians(airportList[j].getM_Lat()))
                                 * Math.cos(Math.toRadians(airportList[i].getM_Long() - airportList[j].getM_Long())));
+                if (distance < shortestDistance[LPid]) 
+                	shortestDistance[LPid] = distance;
             }
         }
+        
+        for (int i = 0; i < size; i++) {
+        	if (i == rank) continue;
+        	lookaheadTable[i] = shortestDistance[i] / fastestSpeed;
+        }
+        
+        lookaheadTable[rank]= Double.MAX_VALUE;
+
+        
+        
+        
         Simulator.stopAt(stopTime);
         //In each loop, new planes will depart at every airport
         
