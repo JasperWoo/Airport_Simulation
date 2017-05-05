@@ -38,7 +38,7 @@ public class AirportSim {
         double[] lookaheadTable = Simulator.getSim().getLookaheadTable();
         Arrays.fill(shortestDistance, Double.MAX_VALUE);
         
-        String csvAirports = "./data_airports.csv";
+        String csvAirports = "../data_airports.csv";
         BufferedReader br = null;
         String line = "";
         String csvSeparator = ",";
