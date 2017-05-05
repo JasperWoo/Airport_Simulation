@@ -14,9 +14,9 @@ _MPJ(version: 044) and java(version: jdk1.8.0_121)_
 
 Compile: 
 
-IF $MPJ_HOME has been configured:
-  javac -cp .:$MPJ_HOME/lib/mpj.jar *.java
-ELSE:
+IF $MPJ_HOME has been configured:  
+  javac -cp .:$MPJ_HOME/lib/mpj.jar *.java  
+ELSE:  
   javac -cp .:../../mpj-v0_44-1/lib/mpj.jar *.java
 
 Run:
