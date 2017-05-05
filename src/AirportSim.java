@@ -20,12 +20,14 @@ public class AirportSim {
     //static Datatype typeAirEvent;
     public static void main(String[] args) {
         //Implemented different airplanes air airports
-        int numInitials = 40;
-        int stopTime = 5;
+        int numInitialsTotal = 100;
+        int stopTime = 50;
         
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
+
+        int numInitials = numInitialsTotal / size;
         
         Simulator.getSim().setFastestSpeed(new double[size]);
         Simulator.getSim().setShortestDistance(new double[size]);
@@ -36,7 +38,7 @@ public class AirportSim {
         double[] lookaheadTable = Simulator.getSim().getLookaheadTable();
         Arrays.fill(shortestDistance, Double.MAX_VALUE);
         
-        String csvAirports = "../data_airports.csv";
+        String csvAirports = "./data_airports.csv";
         BufferedReader br = null;
         String line = "";
         String csvSeparator = ",";
